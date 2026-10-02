@@ -9,8 +9,8 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <maven.compiler.source>25</maven.compiler.source> <!-- igual hay que cambiarlo a 17 si no va x error de versiones (el maven esta en version 17) -->
-        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source> <!-- cambiado a 17 x error de versiones (en workflow esta en version 17, preguntar, si no, de vuelta a 25) -->
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
