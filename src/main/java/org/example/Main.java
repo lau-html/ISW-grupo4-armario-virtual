@@ -20,10 +20,10 @@ public class Main {
         miArmario.add(new Prenda("Pantalones Deporte", "Pantalones", "Negro"));
         
         // Pruebo categorización por tipo "Pantalones"
-        List<Prenda> Pantalones = gestor.prendasPorTipo(miArmario, "Pantalones");
+        List<Prenda> pantalones = gestor.prendasPorTipo(miArmario, "Pantalones");
         
         // Imprimo pantalones
-        System.out.println("Pantalones encontrados: " + Pantalones);
+        System.out.println("Pantalones encontrados: " + pantalones);
     } 
     
 }

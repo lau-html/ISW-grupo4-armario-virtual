@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+
+
 public class GestorCategorias { // SPRINT 1: FILTRAR POR TIPO DE ROPA, ESCALABLE A FILTRAR POR ATRIBUTOS Y A CREAR NUEVAS CATEGORIAS
     
     // Agrupa y categoriza prendas por tipo
