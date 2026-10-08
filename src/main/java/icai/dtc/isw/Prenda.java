@@ -1,15 +1,33 @@
 package icai.dtc.isw;
+import java.io.Serializable;
 
-public class Prenda {
+public class Prenda implements Serializable{
 
+    private static final long serialVersionUID=1L;
     private String nombre;
     private String tipo; // tipo de ropa
     private String color;
+    private int id;
 
     public Prenda (String nombre, String tipo, String color) {
         this.nombre = nombre;
         this.tipo = tipo;
         this.color = color;
+    }
+
+    public Prenda (int id, String nombre, String tipo, String color) {
+        this.id = id;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.color = color;
+    }
+
+    public int getId(){
+        return id;
+    }
+
+    public void setId(int id){
+        this.id = id;
     }
 
     public String getNombre() {
