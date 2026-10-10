@@ -33,6 +33,17 @@ public class Prenda implements Serializable {
         this.nombre = nombre;
         this.tipo = tipo;
         this.color = color;
+
+    }
+
+
+    // Constructor con id pero sin campos nuevos del formulario (lo usan los tests de GestorPrendas) 
+    // Lau: da error si lo eliminamos (porque los tests de GestorPrendas lo usan de momento)
+    public Prenda(int id, String nombre, String tipo, String color) {
+        this.id = id;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.color = color;
     }
 
     public int getId() {
