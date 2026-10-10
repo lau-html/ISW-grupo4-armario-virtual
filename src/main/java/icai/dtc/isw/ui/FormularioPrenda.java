@@ -51,7 +51,7 @@ public class FormularioPrenda extends JFrame {
         add(new JLabel("")); // Espacio vacío para alinear el botón a la derecha
         add(btnGuardar);
 
-        // 5. Conexión de la acción del botón (Aquí es donde te conectas con el código de tus compañeros)
+        // 5. Conexión de la acción del botón 
         btnGuardar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -76,7 +76,7 @@ public class FormularioPrenda extends JFrame {
         }
 
         // AQUÍ VA LA CONEXIÓN CON EL BACKEND
-        // Llamarás al método que tus compañeros hayan creado, por ejemplo:
+        // Llamar al método del controlador para guardar la prenda:
         // ControladorPrenda.guardar(nombre, descripcion, estilo, color, marca, temporada);
 
         JOptionPane.showMessageDialog(this, "Enviando datos al servidor...");
