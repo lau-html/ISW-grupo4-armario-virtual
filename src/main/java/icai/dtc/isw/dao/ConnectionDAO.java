@@ -27,11 +27,21 @@ public class ConnectionDAO {
 		}
 		return connectionDAO;
 	}
-	
+
+	// si la conexion esta cerrada la vuelve a abrir
 	public Connection getConnection() {
+		try {
+			if (con == null || con.isClosed()) {
+				String url = PropertiesISW.getInstance().getProperty("ddbb.connection");
+				String user = PropertiesISW.getInstance().getProperty("ddbb.user");
+				String password = PropertiesISW.getInstance().getProperty("ddbb.password");
+				con = DriverManager.getConnection(url, user, password);
+			}
+		} catch (SQLException ex) {
+			System.out.println(ex.getMessage());
+		}
 		return con;
 	}
-
     public static void main(String[] args) {
 
         String url = PropertiesISW.getInstance().getProperty("ddbb.connection");
