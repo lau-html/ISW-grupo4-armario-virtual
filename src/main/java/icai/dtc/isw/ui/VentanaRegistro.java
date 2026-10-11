@@ -47,6 +47,7 @@ public class VentanaRegistro extends JFrame {
         add(panel);
 
         // Registrar usuario
+        // valida campos obligatorios, llama al controlador y captura errores
         btnRegistrar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -86,7 +87,8 @@ public class VentanaRegistro extends JFrame {
             }
         });
 
-        // Acción: Volver al Login
+
+        // Evento para cerrar el registro y volver a la pantalla de login
         btnVolverLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

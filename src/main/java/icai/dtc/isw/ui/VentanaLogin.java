@@ -48,6 +48,7 @@ public class VentanaLogin extends JFrame {
         add(panel);
 
         // Login
+        // Boton Iniciar Sesion: valida entradas, autentica y abre la ventana principal
         btnLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

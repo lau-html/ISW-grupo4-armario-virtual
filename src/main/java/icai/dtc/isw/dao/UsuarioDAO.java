@@ -8,7 +8,7 @@ import java.sql.SQLException;
 
 public class UsuarioDAO {
 
-    // Verificar si el correo ya existe
+    // Verificar si el correo ya existe antes dde intentarcrearlo
     public static boolean existeEmail(Connection con, String email) throws SQLException {
         String sql = "SELECT COUNT(*) FROM usuarios WHERE email = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -22,7 +22,7 @@ public class UsuarioDAO {
         return false;
     }
 
-    // Guardar nuevo usuario con la contraseña hasheada
+    // Guardar nuevo usuario con la contraseña hasheada en la base de datos
     public static boolean registrarUsuario(Connection con, Usuario usuario) throws SQLException {
         String sql = "INSERT INTO usuarios (email, password) VALUES (?, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -43,6 +43,7 @@ public class UsuarioDAO {
                 }
             }
         }
+        // si no existe devuelve null
         return null;
     }
 }
