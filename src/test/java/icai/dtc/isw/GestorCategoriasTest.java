@@ -49,6 +49,20 @@ class GestorCategoriasTest {
 
     }
 
+    @Test
+    void filtrarPorMarca() {
+        GestorCategorias gestor = new GestorCategorias();
+        List<Prenda> armario = List.of(
+            new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco", "basica", "Deportivo", "Nike", "Atemporal"),
+            new Prenda(2, "Abrigo", "Abrigos", "Beige", "largo", "Elegante", "Zara", "Invierno")
+        );
+
+        List<Prenda> resultado = gestor.filtrarPor(armario, Prenda::getMarca, "Zara");
+
+        assertEquals(1, resultado.size());
+        assertEquals("Abrigo", resultado.get(0).getNombre());
+    }
+
     @Test //testeo por si no existr una categoria te devuelva una lista vacia, no null
     void categoriaInexistenteDevuelveVacio() {
         GestorCategorias gestor = new GestorCategorias();
