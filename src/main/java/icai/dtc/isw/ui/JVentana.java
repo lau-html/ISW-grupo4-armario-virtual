@@ -1,15 +1,35 @@
 package icai.dtc.isw.ui;
 
-import icai.dtc.isw.GestorPrendas;
-import icai.dtc.isw.Prenda;
-import icai.dtc.isw.domain.Usuario;
-import icai.dtc.isw.VisualizarNumPrendas;
-
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+
+import icai.dtc.isw.GestorPrendas;
+import icai.dtc.isw.Prenda;
+import icai.dtc.isw.VisualizarNumPrendas;
+import icai.dtc.isw.domain.Usuario;
 
 // VENTANA PRINCIPAL DE dressB: se abre después de iniciar sesión.
 public class JVentana extends JFrame {
@@ -24,7 +44,8 @@ public class JVentana extends JFrame {
 
     private JPanel panelPrendas; // zona central de "Mi armario" donde se muestran las prendas
     private JList<Prenda> listaPrendas; // lista visible (para saber qué prenda está seleccionada)
-    private List<Prenda> prendasActuales = new ArrayList<>(); // prendas que se están mostrando
+    private List<Prenda> prendasActuales = new ArrayList<>(); // prendas que se están mostrando (pueden ser todas o solo filtradas)
+    private List<Prenda> todasLasPrendas = new ArrayList<>(); // todas las prendas usuario
     private final GestorPrendas gestorPrendas = new GestorPrendas(); // lógica de editar y eliminar
 
     public JVentana() {
@@ -106,6 +127,9 @@ public class JVentana extends JFrame {
         JButton btnEliminar = crearBoton("Eliminar");
         btnEliminar.addActionListener(e -> eliminarPrendaSeleccionada());
         barra.add(btnEliminar);
+        // LAU: filtro por categoria, al elegir una, usa mostrarPrendas con las filtradas
+        PanelFiltroCategorias panelFiltro = new PanelFiltroCategorias(todasLasPrendas, this::mostrarPrendas);
+        barra.add(panelFiltro);
         panel.add(barra, BorderLayout.NORTH);
 
         // Botón del listado de prendad (Ver listado)
