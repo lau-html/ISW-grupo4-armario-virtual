@@ -3,6 +3,8 @@ package icai.dtc.isw.ui;
 import icai.dtc.isw.GestorPrendas;
 import icai.dtc.isw.Prenda;
 import icai.dtc.isw.domain.Usuario;
+import icai.dtc.isw.VisualizarNumPrendas;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -104,6 +106,12 @@ public class JVentana extends JFrame {
         JButton btnEliminar = crearBoton("Eliminar");
         btnEliminar.addActionListener(e -> eliminarPrendaSeleccionada());
         barra.add(btnEliminar);
+        panel.add(barra, BorderLayout.NORTH);
+
+        // Botón del listado de prendad (Ver listado)
+        JButton btnListado = crearBoton("Ver listado");
+        btnListado.addActionListener(e -> VisualizarNumPrendas.mostrarVentana(prendasActuales));
+        barra.add(btnListado);
         panel.add(barra, BorderLayout.NORTH);
 
         // Zona donde se muestran las prendas
