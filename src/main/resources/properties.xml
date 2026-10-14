@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
-<comment>This is easy!</comment>
-	<entry key="ddbb.connection">jdbc:postgresql://ec2-16-171-150-27.eu-north-1.compute.amazonaws.com:5432/isw_grupo4_prod</entry>
+<comment>Configuración de la aplicación</comment>
+	<!-- URL de conexión a PostgreSQL en AWS: jdbc:postgresql://DNSPUBLICA:PUERTO/NOMBRE_BBDD (el DNS cambia cada vez que se apaga y enciende la instancia!) -->
+	<!-- IMPORTANTE!! DEJAR LA PARTE jdbc:postgresql://dnspublica:5432/dev -->
+	<entry key="ddbb.connection">jdbc:postgresql://ec2-51-20-183-160.eu-north-1.compute.amazonaws.com:5432/dev</entry>
+	<!-- Usuario de la base de datos -->
 	<entry key="ddbb.user">postgres</entry>
-	<entry key="ddbb.password">postgres</entry>
+	<!-- Contraseña de la base de datos -->
+	<entry key="ddbb.password">6TgDehRM?pycMhQ?bMxczZ!yX</entry>
+	<!-- Host -->
 	<entry key="host">127.0.0.1</entry>
+	<!-- Puerto -->
 	<entry key="port">8081</entry>
 </properties>
