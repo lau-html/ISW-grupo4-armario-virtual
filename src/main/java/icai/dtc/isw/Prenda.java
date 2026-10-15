@@ -86,13 +86,6 @@ public class Prenda implements Serializable {
         this.descripcion = descripcion;
     }
 
-    public String getEstilo() {
-        return estilo;
-    }
-
-    public void setEstilo(String estilo) {
-        this.estilo = estilo;
-    }
 
     public String getMarca() {
         return marca;

@@ -18,7 +18,7 @@ public class Main implements Serializable {
     private String temporada;
 
     // Constructor con campos que estan en el formulario
-    public Prenda(int id, String nombre, String tipo, String color, String descripcion, String estilo, String marca, String temporada) {
+    public Main(int id, String nombre, String tipo, String color, String descripcion, String estilo, String marca, String temporada) {
         this.id = id;
         this.nombre = nombre;
         this.tipo = tipo;
@@ -30,7 +30,7 @@ public class Main implements Serializable {
     }
 
     // Constructor corto por si solo queremos crear una prenda con nombre, tipo y color (de momento para pruebas)
-    public Prenda(String nombre, String tipo, String color) {
+    public Main(String nombre, String tipo, String color) {
         this.nombre = nombre;
         this.tipo = tipo;
         this.color = color;
@@ -38,9 +38,9 @@ public class Main implements Serializable {
     }
 
 
-    // Constructor con id pero sin campos nuevos del formulario (lo usan los tests de GestorPrendas) 
+    // Constructor con id pero sin campos nuevos del formulario (lo usan los tests de GestorPrendas)
     // Lau: da error si lo eliminamos (porque los tests de GestorPrendas lo usan de momento)
-    public Prenda(int id, String nombre, String tipo, String color) {
+    public Main(int id, String nombre, String tipo, String color) {
         this.id = id;
         this.nombre = nombre;
         this.tipo = tipo;
