@@ -27,7 +27,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import icai.dtc.isw.GestorPrendas;
-import icai.dtc.isw.Prenda;
+import icai.dtc.isw.domain.Prenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
 
@@ -213,19 +213,19 @@ public class JVentana extends JFrame {
             return;
         }
         JTextField txtNombre = new JTextField(prenda.getNombre());
-        JTextField txtTipo = new JTextField(prenda.getTipo());
+        JTextField txtEstilo = new JTextField(prenda.getEstilo());
         JTextField txtColor = new JTextField(prenda.getColor());
 
         JPanel formulario = new JPanel(new GridLayout(3, 2, 8, 8));
         formulario.add(new JLabel("Nombre:")); formulario.add(txtNombre);
-        formulario.add(new JLabel("Tipo:"));   formulario.add(txtTipo);
+        formulario.add(new JLabel("Estilo:"));   formulario.add(txtEstilo);
         formulario.add(new JLabel("Color:"));  formulario.add(txtColor);
 
         int respuesta = JOptionPane.showConfirmDialog(this, formulario,
                 "Editar prenda", JOptionPane.OK_CANCEL_OPTION);
         if (respuesta == JOptionPane.OK_OPTION) {
             gestorPrendas.editarPrenda(prendasActuales, prenda.getId(),
-                    txtNombre.getText(), txtTipo.getText(), txtColor.getText());
+                    txtNombre.getText(), txtEstilo.getText(), txtColor.getText());
             mostrarPrendas(prendasActuales); // refrescar la lista
         }
     }
