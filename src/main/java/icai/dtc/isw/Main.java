@@ -3,7 +3,7 @@ package icai.dtc.isw;
 import java.io.Serializable;
 import icai.dtc.isw.Prenda;
 
-public class Prenda implements Serializable {
+public class Main implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
