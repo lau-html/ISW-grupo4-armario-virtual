@@ -8,7 +8,7 @@ import java.sql.SQLException;
 public class PrendaDAO {
 
     public boolean registrarPrenda(Prenda prenda) {
-        String sql = "INSERT INTO prenda (nombre, descripcion, estilo, color, marca, temporada) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO prenda (nombre, descripcion, tipo, color, marca, temporada) VALUES (?, ?, ?, ?, ?, ?)";
         
         // Obtenemos la conexión usando tu ConnectionDAO
         try (Connection conn = ConnectionDAO.getInstance().getConnection();
@@ -16,7 +16,7 @@ public class PrendaDAO {
             
             pstmt.setString(1, prenda.getNombre());
             pstmt.setString(2, prenda.getDescripcion());
-            pstmt.setString(3, prenda.getEstilo());
+            pstmt.setString(3, prenda.getTipo());
             pstmt.setString(4, prenda.getColor());
             pstmt.setString(5, prenda.getMarca());
             pstmt.setString(6, prenda.getTemporada());

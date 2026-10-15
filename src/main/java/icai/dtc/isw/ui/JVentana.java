@@ -27,7 +27,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import icai.dtc.isw.GestorPrendas;
-import icai.dtc.isw.domain.Prenda;
+import icai.dtc.isw.Prenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
 
@@ -113,7 +113,7 @@ public class JVentana extends JFrame {
         barra.setBackground(CREMA);
         JButton btnAnadir = crearBoton("+ Añadir prenda");
         btnAnadir.addActionListener(e -> {
-            FormularioPrenda formulario = new FormularioPrenda();
+            FormularioPrenda formulario = new FormularioPrenda(this);
             formulario.setLocationRelativeTo(this);
             formulario.setVisible(true);
         });
@@ -132,9 +132,9 @@ public class JVentana extends JFrame {
         barra.add(panelFiltro);
         panel.add(barra, BorderLayout.NORTH);
 
-        // Botón del listado de prendad (Ver listado)
+        // Botón del listado de prendas (Ver listado)
         JButton btnListado = crearBoton("Ver listado");
-        btnListado.addActionListener(e -> VisualizarNumPrendas.mostrarVentana(prendasActuales));
+        btnListado.addActionListener(e -> VisualizarNumPrendas.mostrarVentana( (List) prendasActuales));
         barra.add(btnListado);
         panel.add(barra, BorderLayout.NORTH);
 
@@ -179,6 +179,14 @@ public class JVentana extends JFrame {
         panelPrendas.revalidate();
         panelPrendas.repaint();
     }
+    
+    // Añade una nueva prenda al armario y refresca la vista en texto
+    public void agregarPrenda(Prenda nuevaPrenda) {
+        // Asignar un ID incremental si no tiene uno
+        nuevaPrenda.setId(todasLasPrendas.size() + 1);
+        todasLasPrendas.add(nuevaPrenda);
+        mostrarPrendas(todasLasPrendas);
+    }
 
     //  EDITAR Y ELIMINAR PRENDAS
 
@@ -201,8 +209,8 @@ public class JVentana extends JFrame {
                 "¿Seguro que quieres eliminar \"" + prenda.getNombre() + "\"?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
         if (respuesta == JOptionPane.YES_OPTION) {
-            gestorPrendas.eliminarPrenda(prendasActuales, prenda.getId());
-            mostrarPrendas(prendasActuales); // refrescar la lista
+            gestorPrendas.eliminarPrenda(todasLasPrendas, prenda.getId());
+            mostrarPrendas(todasLasPrendas); // refrescar la lista
         }
     }
 
@@ -213,20 +221,20 @@ public class JVentana extends JFrame {
             return;
         }
         JTextField txtNombre = new JTextField(prenda.getNombre());
-        JTextField txtEstilo = new JTextField(prenda.getEstilo());
+        JTextField txtTipo = new JTextField(prenda.getTipo());
         JTextField txtColor = new JTextField(prenda.getColor());
 
         JPanel formulario = new JPanel(new GridLayout(3, 2, 8, 8));
         formulario.add(new JLabel("Nombre:")); formulario.add(txtNombre);
-        formulario.add(new JLabel("Estilo:"));   formulario.add(txtEstilo);
+        formulario.add(new JLabel("Tipo:"));   formulario.add(txtTipo);
         formulario.add(new JLabel("Color:"));  formulario.add(txtColor);
 
         int respuesta = JOptionPane.showConfirmDialog(this, formulario,
                 "Editar prenda", JOptionPane.OK_CANCEL_OPTION);
         if (respuesta == JOptionPane.OK_OPTION) {
-            gestorPrendas.editarPrenda(prendasActuales, prenda.getId(),
-                    txtNombre.getText(), txtEstilo.getText(), txtColor.getText());
-            mostrarPrendas(prendasActuales); // refrescar la lista
+            gestorPrendas.editarPrenda(todasLasPrendas, prenda.getId(),
+                    txtNombre.getText(), txtTipo.getText(), txtColor.getText());
+            mostrarPrendas(todasLasPrendas); // refrescar la lista
         }
     }
 

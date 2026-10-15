@@ -1,5 +1,6 @@
 package icai.dtc.isw;
 
+import icai.dtc.isw.domain.Prenda;
 import javax.swing.*;
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class VisualizarNumPrendas {
             areaTexto.append(" No hay ninguna prenda, el catálogo está vacío.\n");
         } else {
             for (Prenda prenda : armario) {
+                // Se ha cambiado getTipo() por getEstilo()
                 areaTexto.append(String.format(" • [%s] %s - Color: %s\n",
                         prenda.getTipo(),
                         prenda.getNombre(),
@@ -42,11 +44,11 @@ public class VisualizarNumPrendas {
     }
 
     public static void main(String[] args) {
-        // visualización usando la misma lista que manejan los tests
+        // Se actualizan los datos de prueba para usar los 7 parámetros de la nueva clase Prenda
         List<Prenda> armario = List.of(
-                new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco"),
-                new Prenda(2, "Vaqueros", "Pantalones", "Azul"),
-                new Prenda(3, "Pantalones Deporte", "Pantalones", "Negro")
+                new Prenda(1, "Camiseta Nike", "Descripción genérica", "Casual", "Blanco", "Nike", "Verano"),
+                new Prenda(2, "Vaqueros", "Descripción genérica", "Urbano", "Azul", "Levi's", "Atemporal"),
+                new Prenda(3, "Pantalones Deporte", "Descripción genérica", "Deportivo", "Negro", "Adidas", "Atemporal")
         );
 
         SwingUtilities.invokeLater(() -> mostrarVentana(armario));
