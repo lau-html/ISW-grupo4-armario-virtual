@@ -1,34 +1,118 @@
 package icai.dtc.isw;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
+import icai.dtc.isw.Prenda;
 
-public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hola, Armario Virtual! :)");
+public class Prenda implements Serializable {
 
-        // PROBANDO GESTOR DE CATEGORIAS
+    private static final long serialVersionUID = 1L;
 
-        // Instancio gestor
-        GestorCategorias gestor = new GestorCategorias();
+    // Atributos de la prenda: de momento id + los del formulario, se podrian añadir mas en el futuro
+    private int id;
+    private String nombre;
+    private String tipo; // tipo de ropa (falda, pantalón, camiseta, etc.)
+    private String color;
+    private String descripcion;
+    private String estilo;
+    private String marca;
+    private String temporada;
 
-        // Añado un armario temporal hasta conectar con BBDD
-        List<Prenda> miArmario = new ArrayList<>();
+    // Constructor con campos que estan en el formulario
+    public Prenda(int id, String nombre, String tipo, String color, String descripcion, String estilo, String marca, String temporada) {
+        this.id = id;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.color = color;
+        this.descripcion = descripcion;
+        this.estilo = estilo;
+        this.marca = marca;
+        this.temporada = temporada;
+    }
 
-        miArmario.add(new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco", "Camiseta basica", "Deportivo", "Nike", "Atemporal"));
-        miArmario.add(new Prenda(2, "Vaqueros Majada", "Pantalones", "Azul", "Vaqueros rectos", "Casual", "Levi's", "Atemporal"));
-        miArmario.add(new Prenda(3, "Gabardina", "Abrigos", "Marron", "Cazadora de entretiempo", "Elegante", "Zara", "Primavera"));
+    // Constructor corto por si solo queremos crear una prenda con nombre, tipo y color (de momento para pruebas)
+    public Prenda(String nombre, String tipo, String color) {
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.color = color;
 
-        // Pruebo filtrar por tipo "Pantalones" - SPRINT 1
-        List<Prenda> pantalones = gestor.prendasPorTipo(miArmario, "Pantalones");
-        System.out.println("Pantalones encontrados: " + pantalones);
+    }
 
-        // Pruebo el filtro generico por marca
-        List<Prenda> zara = gestor.filtrarPor(miArmario, Prenda::getMarca, "Zara");
-        System.out.println("De Zara: " + zara);
 
-        // Pruebo el filtro generico por estilo
-        List<Prenda> elegantes = gestor.filtrarPor(miArmario, Prenda::getEstilo, "Elegante");
-        System.out.println("Elegantes: " + elegantes);
+    // Constructor con id pero sin campos nuevos del formulario (lo usan los tests de GestorPrendas) 
+    // Lau: da error si lo eliminamos (porque los tests de GestorPrendas lo usan de momento)
+    public Prenda(int id, String nombre, String tipo, String color) {
+        this.id = id;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.color = color;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    /*public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    } */
+
+    public String getMarca() {
+        return marca;
+    }
+
+    public void setMarca(String marca) {
+        this.marca = marca;
+    }
+
+    public String getTemporada() {
+        return temporada;
+    }
+
+    public void setTemporada(String temporada) {
+        this.temporada = temporada;
+    }
+
+    @Override
+    public String toString() {
+        return nombre + " (" + tipo + ", " + color + " " + estilo + ", " + marca + ", " + temporada + ", " + descripcion + ")";
     }
 }

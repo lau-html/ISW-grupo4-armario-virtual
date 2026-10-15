@@ -1,5 +1,7 @@
 package icai.dtc.isw.ui;
 
+import icai.dtc.isw.Prenda;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -7,25 +9,36 @@ import java.awt.event.ActionListener;
 
 public class FormularioPrenda extends JFrame {
 
-    // 1. Declarar los componentes visuales
+    // 1. Declarar los componentes visuales y la referencia a la ventana principal
     private JTextField txtNombre, txtDescripcion, txtColor, txtMarca;
-    private JComboBox<String> cbEstilo, cbTemporada;
+    private JComboBox<String> cbTipo, cbEstilo, cbTemporada;
     private JButton btnGuardar;
+    private JVentana ventanaPrincipal;
 
+    // Constructor vacío por si se abre de forma independiente en pruebas
     public FormularioPrenda() {
+        this(null);
+    }
+
+    // Constructor conectado con el armario principal (JVentana)
+    public FormularioPrenda(JVentana ventanaPrincipal) {
+        this.ventanaPrincipal = ventanaPrincipal;
+
         // Configuración básica de la ventana
         setTitle("Registro de Nueva Prenda");
-        setSize(400, 350);
+        setSize(400, 380);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new GridLayout(7, 2, 10, 10)); // Cuadrícula de 7 filas y 2 columnas con márgenes
+        setLayout(new GridLayout(8, 2, 10, 10)); // 8 filas y 2 columnas
 
-        // 2. Inicializar los campos de texto
+        // 2. Inicializar los campos de texto y desplegables
         txtNombre = new JTextField();
         txtDescripcion = new JTextField();
         txtColor = new JTextField();
         txtMarca = new JTextField();
 
-        // Para el estilo y temporada, usamos listas desplegables (JComboBox) para evitar errores del usuario
+        String[] tipos = {"Camiseta", "Pantalón", "Falda", "Vestido", "Chaqueta", "Calzado", "Accesorio"};
+        cbTipo = new JComboBox<>(tipos);
+
         String[] estilos = {"Casual", "Urbano", "Deportivo", "Formal", "Elegante"};
         cbEstilo = new JComboBox<>(estilos);
 
@@ -35,6 +48,8 @@ public class FormularioPrenda extends JFrame {
         // 3. Añadir los componentes a la ventana (Etiqueta + Campo)
         add(new JLabel(" Nombre:"));
         add(txtNombre);
+        add(new JLabel(" Tipo / Categoría:"));
+        add(cbTipo);
         add(new JLabel(" Descripción:"));
         add(txtDescripcion);
         add(new JLabel(" Estilo:"));
@@ -48,10 +63,10 @@ public class FormularioPrenda extends JFrame {
 
         // 4. Configurar el botón de guardar
         btnGuardar = new JButton("Guardar Prenda");
-        add(new JLabel("")); // Espacio vacío para alinear el botón a la derecha
+        add(new JLabel(""));
         add(btnGuardar);
 
-        // 5. Conexión de la acción del botón 
+        // 5. Conexión de la acción del botón
         btnGuardar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -62,32 +77,35 @@ public class FormularioPrenda extends JFrame {
 
     private void guardarDatos() {
         // Recoger los datos que el usuario ha escrito
-        String nombre = txtNombre.getText();
-        String descripcion = txtDescripcion.getText();
+        String nombre = txtNombre.getText().trim();
+        String tipo = (String) cbTipo.getSelectedItem();
+        String descripcion = txtDescripcion.getText().trim();
         String estilo = (String) cbEstilo.getSelectedItem();
-        String color = txtColor.getText();
-        String marca = txtMarca.getText();
+        String color = txtColor.getText().trim();
+        String marca = txtMarca.getText().trim();
         String temporada = (String) cbTemporada.getSelectedItem();
 
-        // Pequeña validación en el frontal antes de enviar al servidor
-        if (nombre.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El nombre es obligatorio", "Error", JOptionPane.ERROR_MESSAGE);
+        // Validación en el frontal
+        if (nombre.isEmpty() || color.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El nombre y el color son obligatorios", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // AQUÍ VA LA CONEXIÓN CON EL BACKEND
-        // Llamar al método del controlador para guardar la prenda:
-        // ControladorPrenda.guardar(nombre, descripcion, estilo, color, marca, temporada);
+        // Crear la prenda y enviarla a la ventana del armario para mostrarla como texto
+        Prenda nuevaPrenda = new Prenda(0, nombre, tipo, color, descripcion, estilo, marca, temporada);
 
-        JOptionPane.showMessageDialog(this, "Enviando datos al servidor...");
+        if (ventanaPrincipal != null) {
+            ventanaPrincipal.agregarPrenda(nuevaPrenda);
+        }
+
+        JOptionPane.showMessageDialog(this, "¡Prenda añadida al armario!");
+        dispose(); // Cerrar el formulario al terminar
     }
 
-    // Método principal para probar tu ventana directamente
     public static void main(String[] args) {
-        // Ejecutar la interfaz gráfica de forma segura
         SwingUtilities.invokeLater(() -> {
             FormularioPrenda ventana = new FormularioPrenda();
-            ventana.setLocationRelativeTo(null); // Centrar en la pantalla
+            ventana.setLocationRelativeTo(null);
             ventana.setVisible(true);
         });
     }

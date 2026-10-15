@@ -113,7 +113,7 @@ public class JVentana extends JFrame {
         barra.setBackground(CREMA);
         JButton btnAnadir = crearBoton("+ Añadir prenda");
         btnAnadir.addActionListener(e -> {
-            FormularioPrenda formulario = new FormularioPrenda();
+            FormularioPrenda formulario = new FormularioPrenda(this);
             formulario.setLocationRelativeTo(this);
             formulario.setVisible(true);
         });
@@ -132,9 +132,9 @@ public class JVentana extends JFrame {
         barra.add(panelFiltro);
         panel.add(barra, BorderLayout.NORTH);
 
-        // Botón del listado de prendad (Ver listado)
+        // Botón del listado de prendas (Ver listado)
         JButton btnListado = crearBoton("Ver listado");
-        btnListado.addActionListener(e -> VisualizarNumPrendas.mostrarVentana(prendasActuales));
+        btnListado.addActionListener(e -> VisualizarNumPrendas.mostrarVentana( (List) prendasActuales));
         barra.add(btnListado);
         panel.add(barra, BorderLayout.NORTH);
 
@@ -179,6 +179,14 @@ public class JVentana extends JFrame {
         panelPrendas.revalidate();
         panelPrendas.repaint();
     }
+    
+    // Añade una nueva prenda al armario y refresca la vista en texto
+    public void agregarPrenda(Prenda nuevaPrenda) {
+        // Asignar un ID incremental si no tiene uno
+        nuevaPrenda.setId(todasLasPrendas.size() + 1);
+        todasLasPrendas.add(nuevaPrenda);
+        mostrarPrendas(todasLasPrendas);
+    }
 
     //  EDITAR Y ELIMINAR PRENDAS
 
@@ -201,8 +209,8 @@ public class JVentana extends JFrame {
                 "¿Seguro que quieres eliminar \"" + prenda.getNombre() + "\"?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
         if (respuesta == JOptionPane.YES_OPTION) {
-            gestorPrendas.eliminarPrenda(prendasActuales, prenda.getId());
-            mostrarPrendas(prendasActuales); // refrescar la lista
+            gestorPrendas.eliminarPrenda(todasLasPrendas, prenda.getId());
+            mostrarPrendas(todasLasPrendas); // refrescar la lista
         }
     }
 
@@ -224,9 +232,9 @@ public class JVentana extends JFrame {
         int respuesta = JOptionPane.showConfirmDialog(this, formulario,
                 "Editar prenda", JOptionPane.OK_CANCEL_OPTION);
         if (respuesta == JOptionPane.OK_OPTION) {
-            gestorPrendas.editarPrenda(prendasActuales, prenda.getId(),
+            gestorPrendas.editarPrenda(todasLasPrendas, prenda.getId(),
                     txtNombre.getText(), txtTipo.getText(), txtColor.getText());
-            mostrarPrendas(prendasActuales); // refrescar la lista
+            mostrarPrendas(todasLasPrendas); // refrescar la lista
         }
     }
 
