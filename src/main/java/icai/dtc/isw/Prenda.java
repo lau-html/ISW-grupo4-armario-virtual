@@ -86,13 +86,6 @@ public class Prenda implements Serializable {
         this.descripcion = descripcion;
     }
 
-    /*public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    } */
 
     public String getMarca() {
         return marca;
