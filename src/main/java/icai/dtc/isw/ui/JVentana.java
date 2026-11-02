@@ -47,6 +47,7 @@ public class JVentana extends JFrame {
     private List<Prenda> prendasActuales = new ArrayList<>(); // prendas que se están mostrando (pueden ser todas o solo filtradas)
     private List<Prenda> todasLasPrendas = new ArrayList<>(); // todas las prendas usuario
     private final GestorPrendas gestorPrendas = new GestorPrendas(); // lógica de editar y eliminar
+    private PanelFiltroCategorias panelFiltro; // filtro de categorias, hay que actualizarlo cuando cambian las prendas para que vea las nuevas categorias
 
     public JVentana() {
         super("dressB");
@@ -128,9 +129,8 @@ public class JVentana extends JFrame {
         btnEliminar.addActionListener(e -> eliminarPrendaSeleccionada());
         barra.add(btnEliminar);
         // LAU: filtro por categoria, al elegir una, usa mostrarPrendas con las filtradas
-        PanelFiltroCategorias panelFiltro = new PanelFiltroCategorias(todasLasPrendas, this::mostrarPrendas);
+        panelFiltro = new PanelFiltroCategorias(todasLasPrendas, this::mostrarPrendas);
         barra.add(panelFiltro);
-        panel.add(barra, BorderLayout.NORTH);
 
         // Botón del listado de prendas (Ver listado)
         JButton btnListado = crearBoton("Ver listado");
@@ -186,6 +186,7 @@ public class JVentana extends JFrame {
         nuevaPrenda.setId(todasLasPrendas.size() + 1);
         todasLasPrendas.add(nuevaPrenda);
         mostrarPrendas(todasLasPrendas);
+        panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la nueva prenda
     }
 
     //  EDITAR Y ELIMINAR PRENDAS
@@ -211,6 +212,7 @@ public class JVentana extends JFrame {
         if (respuesta == JOptionPane.YES_OPTION) {
             gestorPrendas.eliminarPrenda(todasLasPrendas, prenda.getId());
             mostrarPrendas(todasLasPrendas); // refrescar la lista
+            panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la prenda eliminada
         }
     }
 
@@ -235,6 +237,7 @@ public class JVentana extends JFrame {
             gestorPrendas.editarPrenda(todasLasPrendas, prenda.getId(),
                     txtNombre.getText(), txtTipo.getText(), txtColor.getText());
             mostrarPrendas(todasLasPrendas); // refrescar la lista
+            panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la prenda editada
         }
     }
 
