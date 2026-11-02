@@ -30,6 +30,7 @@ import icai.dtc.isw.GestorPrendas;
 import icai.dtc.isw.Prenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
+import icai.dtc.isw.ui.VentanaDetallePrenda;
 
 // VENTANA PRINCIPAL DE dressB: se abre después de iniciar sesión.
 public class JVentana extends JFrame {
@@ -173,6 +174,18 @@ public class JVentana extends JFrame {
             lista.setSelectionBackground(ROSA);
             lista.setSelectionForeground(BURDEOS);
             listaPrendas = lista;
+            // Se añade un MouseListener a la lista del catálogo para abrir la ventana emergente al hacer doble clic sobre una prenda.
+            listaPrendas.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.getClickCount() == 2) {
+                        Prenda prendaSeleccionada = listaPrendas.getSelectedValue();
+                        if (prendaSeleccionada != null) {
+                            new VentanaDetallePrenda(prendaSeleccionada).setVisible(true);
+                        }
+                    }
+                }
+            });
             panelPrendas.add(new JScrollPane(lista), BorderLayout.CENTER);
         }
 
