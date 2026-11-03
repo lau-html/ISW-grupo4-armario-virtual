@@ -1,7 +1,10 @@
 package icai.dtc.isw;
-import java.util.List;
 
-public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
+import java.util.List;
+import icai.dtc.isw.domain.Prenda; // Importación necesaria para que reconozca el objeto Prenda
+
+public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS
+
     // Busca una prenda por su id. Devuelve null si no existe.
     public Prenda buscarPorId(List<Prenda> prendas, int id) {
         for (Prenda prenda : prendas) {
@@ -20,13 +23,14 @@ public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
             return false;
         }
         prenda.setNombre(nombre);
-        prenda.setTipo(tipo);
+        prenda.setEstilo(tipo);
         prenda.setColor(color);
         return true;
     }
 
     // Elimina la prenda con ese id.
     // Devuelve true si la ha encontrado y borrado, false si no existe.
+    // CORRECCIÓN: Se han quitado los parámetros "nombre", "tipo" y "color" que sobraban
     public boolean eliminarPrenda(List<Prenda> prendas, int id) {
         return prendas.removeIf(prenda -> prenda.getId() == id);
     }
