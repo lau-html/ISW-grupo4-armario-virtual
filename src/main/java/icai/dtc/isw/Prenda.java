@@ -1,5 +1,6 @@
 package icai.dtc.isw;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -7,9 +8,10 @@ import java.util.List;
 
 public class Prenda implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    // Atributos originales
+    // --- ATRIBUTOS ORIGINALES ---
     private int id;
     private String nombre;
     private String tipo;
@@ -19,20 +21,20 @@ public class Prenda implements Serializable {
     private String marca;
     private String temporada;
 
-    // NUEVOS ATRIBUTOS SPRINT 2
+    // --- NUEVOS ATRIBUTOS SPRINT 2 ---
     private String rutaFoto;
     private String correoUsuario;
     private boolean esFavorito;
     private LocalDateTime fechaCreacion;
     private List<String> categoriasPersonalizadas;
 
-    // Constructor vacío útil para crear mocks e instanciar usando setters
+    // 1. Constructor vacío (útil para crear mocks e instanciar usando setters)
     public Prenda() {
         this.categoriasPersonalizadas = new ArrayList<>();
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    // Constructor con campos del formulario original
+    // 2. Constructor para recuperar los datos de la base de datos o de formularios antiguos (INCLUYE ID)
     public Prenda(int id, String nombre, String tipo, String color, String descripcion, String estilo, String marca, String temporada) {
         this.id = id;
         this.nombre = nombre;
@@ -46,7 +48,20 @@ public class Prenda implements Serializable {
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    // Constructor corto (pruebas)
+    // 3. ¡RESCATADO Y ACTUALIZADO! Constructor para BBDD (SIN ID, lo genera SQL automáticamente)
+    public Prenda(String nombre, String descripcion, String tipo, String color, String estilo, String marca, String temporada) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.tipo = tipo;
+        this.color = color;
+        this.estilo = estilo; // Se añade el estilo que faltaba en la clase vieja
+        this.marca = marca;
+        this.temporada = temporada;
+        this.categoriasPersonalizadas = new ArrayList<>();
+        this.fechaCreacion = LocalDateTime.now();
+    }
+
+    // 4. Constructor corto para pruebas antiguas
     public Prenda(String nombre, String tipo, String color) {
         this.nombre = nombre;
         this.tipo = tipo;
@@ -55,7 +70,7 @@ public class Prenda implements Serializable {
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    // Constructor para tests de GestorPrendas (Lau)
+    // 5. Constructor para tests de GestorPrendas (Lau)
     public Prenda(int id, String nombre, String tipo, String color) {
         this.id = id;
         this.nombre = nombre;
@@ -65,7 +80,7 @@ public class Prenda implements Serializable {
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    // --- GETTERS Y SETTERS ORIGINALES ---
+    // --- GETTERS Y SETTERS ORIGINALES CORREGIDOS ---
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -82,7 +97,7 @@ public class Prenda implements Serializable {
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
     public String getEstilo() { return estilo; }
-    public void setEstilo(String estilo) { this.estilo = estilo; }
+    public void setEstilo(String estilo) { this.estilo = estilo; } // Corregido el bug de la clase vieja
 
     public String getMarca() { return marca; }
     public void setMarca(String marca) { this.marca = marca; }

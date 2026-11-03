@@ -64,16 +64,17 @@ public class VentanaDetallePrenda extends JDialog {
         cargarImagenEnGrande(p.getRutaFoto(), lblImagen);
         add(lblImagen, BorderLayout.CENTER);
 
-        // 3. ZONA INFERIOR: Información actual de la prenda
-        // Agrupa y muestra los atributos de la prenda (descripción, marca, color, estilo y temporada).
+        // 3. ZONA INFERIOR: Toda la información que antes salía en el listado principal
         JPanel panelInfo = new JPanel(new GridLayout(0, 1, 5, 5));
         panelInfo.setBorder(BorderFactory.createEmptyBorder(10, 25, 20, 25));
 
-        panelInfo.add(crearEtiquetaDato("Descripción: ", p.getDescripcion()));
-        panelInfo.add(crearEtiquetaDato("Marca: ", p.getMarca()));
+        panelInfo.add(crearEtiquetaDato("Nombre: ", p.getNombre()));
+        panelInfo.add(crearEtiquetaDato("Tipo: ", p.getTipo()));
         panelInfo.add(crearEtiquetaDato("Color: ", p.getColor()));
         panelInfo.add(crearEtiquetaDato("Estilo: ", p.getEstilo()));
+        panelInfo.add(crearEtiquetaDato("Marca: ", p.getMarca()));
         panelInfo.add(crearEtiquetaDato("Temporada: ", p.getTemporada()));
+        panelInfo.add(crearEtiquetaDato("Descripción: ", p.getDescripcion()));
 
         add(panelInfo, BorderLayout.SOUTH);
     }
@@ -109,29 +110,45 @@ public class VentanaDetallePrenda extends JDialog {
     }
 
     // Muestra un mensaje emergente temporal que desaparece solo a los 3 segundos
+    // Muestra un mensaje emergente centrado, semitransparente, con bordes redondeados y de 2 segundos de duración
     private void mostrarMensajeTemporal(String mensaje) {
         JDialog dialogMensaje = new JDialog(this, false);
-        dialogMensaje.setUndecorated(true); // Sin barra de título ni botones de cerrar
-        dialogMensaje.setLayout(new BorderLayout());
+        dialogMensaje.setUndecorated(true);
+        // Hacemos que el fondo base de la ventana sea totalmente transparente para que se vean las esquinas redondeadas
+        dialogMensaje.setBackground(new Color(0, 0, 0, 0));
+
+        // Panel personalizado que dibuja el fondo burdeos semitransparente y redondeado
+        JPanel panelRedondeado = new JPanel(new BorderLayout()) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                // Suavizado de bordes (Antialiasing) para que la curva se vea nítida
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Mismo tono BURDEOS (87, 6, 45) con canal alfa a 210 (sobre 255) para darle transparencia
+                g2.setColor(new Color(87, 6, 45, 210));
+                // Dibuja el rectángulo con un radio de curvatura de 25px en las esquinas
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
+                g2.dispose();
+            }
+        };
+        panelRedondeado.setOpaque(false);
+        panelRedondeado.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
 
         JLabel lblMensaje = new JLabel(mensaje, SwingConstants.CENTER);
-        lblMensaje.setOpaque(true);
-        lblMensaje.setBackground(new Color(87, 6, 45)); // Color BURDEOS de la app
-        lblMensaje.setForeground(Color.WHITE);
+        lblMensaje.setForeground(new Color(251, 246, 241)); // Color CREMA para el texto
         lblMensaje.setFont(new Font("SansSerif", Font.BOLD, 14));
-        lblMensaje.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        dialogMensaje.add(lblMensaje);
+        panelRedondeado.add(lblMensaje, BorderLayout.CENTER);
+        dialogMensaje.setContentPane(panelRedondeado);
         dialogMensaje.pack();
 
-        // Lo centramos respecto a la ventana de la prenda y lo bajamos un poco
+        // Lo coloca exactamente en el centro de la ventana emergente de la prenda
         dialogMensaje.setLocationRelativeTo(this);
-        dialogMensaje.setLocation(dialogMensaje.getX(), dialogMensaje.getY() + 180);
-
         dialogMensaje.setVisible(true);
 
-        // Timer de javax.swing.Timer que cierra el mensaje a los 3000 ms (3 segundos)
-        Timer timer = new Timer(3000, evt -> dialogMensaje.dispose());
+        // Temporizador ajustado a 2000 ms (2 segundos)
+        Timer timer = new Timer(2000, evt -> dialogMensaje.dispose());
         timer.setRepeats(false);
         timer.start();
     }
