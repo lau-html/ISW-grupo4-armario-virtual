@@ -18,9 +18,9 @@ class GestorPrendasTest {
     void setUp() {
         gestor = new GestorPrendas();
         armario = new ArrayList<>();
-        //armario.add(new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco"));
-        //armario.add(new Prenda(2, "Vaqueros", "Pantalones", "Azul"));
-        //armario.add(new Prenda(3, "Pantalones Deporte", "Pantalones", "Negro"));
+        armario.add(new Prenda(1, "Camiseta Nike", "Camiseta de manga corta", "Camisetas", "Blanco", "Nike", "Verano"));
+        armario.add(new Prenda(2, "Vaqueros", "Vaqueros rectos", "Pantalones", "Azul", "Levis", "Atemporal"));
+        armario.add(new Prenda(3, "Pantalones Deporte", "Pantalones para entrenar", "Pantalones", "Negro", "Adidas", "Invierno"));
     }
 
     @Test
