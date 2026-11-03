@@ -49,6 +49,7 @@ public class JVentana extends JFrame {
     private List<Prenda> prendasActuales = new ArrayList<>(); // prendas que se están mostrando (pueden ser todas o solo filtradas)
     private List<Prenda> todasLasPrendas = new ArrayList<>(); // todas las prendas usuario
     private final GestorPrendas gestorPrendas = new GestorPrendas(); // lógica de editar y eliminar
+    private PanelFiltroCategorias panelFiltro; // filtro de categorias, hay que actualizarlo cuando cambian las prendas para que vea las nuevas categorias
 
     // Desplegables de la pestaña Outfits
     private JComboBox<Prenda> cbArriba = new JComboBox<>();
@@ -138,9 +139,8 @@ public class JVentana extends JFrame {
         barra.add(btnEliminar);
         
         // LAU: filtro por categoria, al elegir una, usa mostrarPrendas con las filtradas
-        PanelFiltroCategorias panelFiltro = new PanelFiltroCategorias(todasLasPrendas, this::mostrarPrendas);
+        panelFiltro = new PanelFiltroCategorias(todasLasPrendas, this::mostrarPrendas);
         barra.add(panelFiltro);
-        panel.add(barra, BorderLayout.NORTH);
 
         // Botón del listado de prendas (Ver listado)
         JButton btnListado = crearBoton("Ver listado");
@@ -280,6 +280,7 @@ public class JVentana extends JFrame {
         todasLasPrendas.add(nuevaPrenda);
         mostrarPrendas(todasLasPrendas);
         actualizarDesplegables(); // Se actualizan los desplegables
+        panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la nueva prenda
     }
 
     // EDITAR Y ELIMINAR PRENDAS
@@ -306,6 +307,7 @@ public class JVentana extends JFrame {
             gestorPrendas.eliminarPrenda(todasLasPrendas, prenda.getId());
             mostrarPrendas(todasLasPrendas); // refrescar la lista
             actualizarDesplegables();        // refrescar desplegables
+            panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la prenda eliminada
         }
     }
 
@@ -331,6 +333,7 @@ public class JVentana extends JFrame {
                     txtNombre.getText(), txtTipo.getText(), txtColor.getText());
             mostrarPrendas(todasLasPrendas); // refrescar la lista
             actualizarDesplegables();        // refrescar desplegables
+            panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la prenda editada
         }
     }
 
