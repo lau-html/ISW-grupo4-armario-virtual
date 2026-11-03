@@ -17,9 +17,9 @@ class GestorCategoriasTest {
         // preparo un armario de prueba
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-               // new Prenda("Camiseta", "Camisetas", "Blanco"),
-                //new Prenda("Vaqueros", "Pantalones", "Azul"),
-                //new Prenda("Pantalón", "Pantalones", "Negro")
+                new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Nike", "Verano"),
+                new Prenda("Vaqueros", "Vaqueros rectos", "Pantalones", "Azul", "Levis", "Atemporal"),
+                new Prenda("Pantalón", "Pantalon de vestir", "Pantalones", "Negro", "Zara", "Invierno")
         );
 
         // llamo al método
@@ -37,9 +37,9 @@ class GestorCategoriasTest {
 
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-                //new Prenda("Camiseta", "Camisetas", "Blanco"),
-                //new Prenda("Vaqueros", "Pantalones", "Azul"),
-                //new Prenda("Pantalón", "Pantalones", "Negro")
+                new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Nike", "Verano"),
+                new Prenda("Vaqueros", "Vaqueros rectos", "Pantalones", "Azul", "Levis", "Atemporal"),
+                new Prenda("Pantalón", "Pantalon de vestir", "Pantalones", "Negro", "Zara", "Invierno")
         );
 
         List<Prenda> pantalones = gestor.prendasPorTipo(armario, "Pantalones");
@@ -53,9 +53,10 @@ class GestorCategoriasTest {
     void filtrarPorMarca() {
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-            //new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco", "basica", "Deportivo", "Nike", "Atemporal"),
-            //new Prenda(2, "Abrigo", "Abrigos", "Beige", "largo", "Elegante", "Zara", "Invierno")
+                new Prenda(1, "Camiseta Nike", "Camiseta de manga corta", "Camisetas", "Blanco", "Nike", "Verano"),
+                new Prenda(2, "Abrigo", "Abrigo largo", "Abrigos", "Beige", "Zara", "Invierno")
         );
+
 
         List<Prenda> resultado = gestor.filtrarPor(armario, Prenda::getMarca, "Zara");
 
@@ -67,7 +68,7 @@ class GestorCategoriasTest {
     void categoriaInexistenteDevuelveVacio() {
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-                //new Prenda("Camiseta", "Camisetas", "Blanco")
+                new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Nike", "Verano")
         );
         List<Prenda> bufandas = gestor.prendasPorTipo(armario, "Bufandas");
         assertNotNull(bufandas);
