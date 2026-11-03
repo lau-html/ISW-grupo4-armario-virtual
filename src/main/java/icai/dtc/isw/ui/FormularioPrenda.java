@@ -1,6 +1,6 @@
 package icai.dtc.isw.ui;
 
-import icai.dtc.isw.Prenda;
+import icai.dtc.isw.domain.Prenda;
 
 import javax.swing.*;
 import java.awt.*;
@@ -92,7 +92,10 @@ public class FormularioPrenda extends JFrame {
         }
 
         // Crear la prenda y enviarla a la ventana del armario para mostrarla como texto
-        Prenda nuevaPrenda = new Prenda(0, nombre, tipo, color, descripcion, estilo, marca, temporada);
+        // Usando el constructor para prendas nuevas (sin el 0 inicial)
+        Prenda nuevaPrenda = new Prenda(nombre, descripcion, tipo, color, marca, temporada);
+        // Usando el constructor con ID (pasando 0)
+        //Prenda nuevaPrenda = new Prenda(0, nombre, descripcion, tipo, color, marca, temporada);
 
         if (ventanaPrincipal != null) {
             ventanaPrincipal.agregarPrenda(nuevaPrenda);
