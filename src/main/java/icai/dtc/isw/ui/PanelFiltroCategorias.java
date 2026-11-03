@@ -7,7 +7,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import icai.dtc.isw.GestorCategorias;
-import icai.dtc.isw.Prenda;
+import icai.dtc.isw.domain.Prenda;
 
 // Nota: esto es un panel porque al filtrar aparecera dentro de una ventana, no es una ventana en sí.
 // Hago el panel aparte para poder reutilizarlo sin necesidad de cambair directamente el codigo de las ventanas que ya funcionan - LAU

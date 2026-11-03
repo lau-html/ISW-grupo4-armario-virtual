@@ -2,7 +2,7 @@ package icai.dtc.isw;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
+import icai.dtc.isw.domain.Prenda;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,9 +18,9 @@ class GestorPrendasTest {
     void setUp() {
         gestor = new GestorPrendas();
         armario = new ArrayList<>();
-        armario.add(new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco"));
-        armario.add(new Prenda(2, "Vaqueros", "Pantalones", "Azul"));
-        armario.add(new Prenda(3, "Pantalones Deporte", "Pantalones", "Negro"));
+        //armario.add(new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco"));
+        //armario.add(new Prenda(2, "Vaqueros", "Pantalones", "Azul"));
+        //armario.add(new Prenda(3, "Pantalones Deporte", "Pantalones", "Negro"));
     }
 
     @Test
