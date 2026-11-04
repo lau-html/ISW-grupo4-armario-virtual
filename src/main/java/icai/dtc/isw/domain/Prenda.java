@@ -2,9 +2,10 @@ package icai.dtc.isw.domain;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 public class Prenda implements Serializable {
-    
+
     // Serializable permite convertir una instancia de Prenda en un flujo de bytes
     @Serial
     private static final long serialVersionUID = 1L;
@@ -16,6 +17,10 @@ public class Prenda implements Serializable {
     private String color;
     private String marca;
     private String temporada;
+
+    // SPRINT 2: dueño de la prenda y fecha en que se guardó
+    private String usuarioEmail;
+    private LocalDateTime fechaCreacion;
 
     // Constructor vacío por defecto
     public Prenda() {}
@@ -63,14 +68,21 @@ public class Prenda implements Serializable {
     public String getTemporada() { return temporada; }
     public void setTemporada(String temporada) { this.temporada = temporada; }
 
-  @Override
-  public String toString() {
-      String infoExtra = "";
-      if (tipo != null && !tipo.isEmpty()) infoExtra += " | Estilo: " + tipo;
-      if (marca != null && !marca.isEmpty()) infoExtra += " | Marca: " + marca;
-      if (temporada != null && !temporada.isEmpty()) infoExtra += " | Temp: " + temporada;
-      if (descripcion != null && !descripcion.isEmpty()) infoExtra += " (" + descripcion + ")";
+    // SPRINT 2
+    public String getUsuarioEmail() { return usuarioEmail; }
+    public void setUsuarioEmail(String usuarioEmail) { this.usuarioEmail = usuarioEmail; }
 
-      return nombre + "  —  [" + tipo + "]  |  Color: " + color + infoExtra;
-  }
+    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+
+    @Override
+    public String toString() {
+        String infoExtra = "";
+        if (tipo != null && !tipo.isEmpty()) infoExtra += " | Estilo: " + tipo;
+        if (marca != null && !marca.isEmpty()) infoExtra += " | Marca: " + marca;
+        if (temporada != null && !temporada.isEmpty()) infoExtra += " | Temp: " + temporada;
+        if (descripcion != null && !descripcion.isEmpty()) infoExtra += " (" + descripcion + ")";
+
+        return nombre + "  —  [" + tipo + "]  |  Color: " + color + infoExtra;
+    }
 }
