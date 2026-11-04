@@ -1,6 +1,6 @@
 package icai.dtc.isw.dao;
 
-import icai.dtc.isw.domain.Prenda;
+import icai.dtc.isw.Prenda;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

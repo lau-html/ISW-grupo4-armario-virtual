@@ -1,8 +1,6 @@
 package icai.dtc.isw;
 
 import icai.dtc.isw.dao.OutfitDAO;
-import icai.dtc.isw.domain.Outfit;
-import icai.dtc.isw.domain.Prenda;
 import java.util.List;
 
 public class GestorOutfits {

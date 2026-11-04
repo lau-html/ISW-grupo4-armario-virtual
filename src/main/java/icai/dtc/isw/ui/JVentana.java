@@ -28,10 +28,11 @@ import javax.swing.UIManager;
 import javax.swing.JComboBox;
 
 import icai.dtc.isw.GestorPrendas;
-import icai.dtc.isw.domain.Prenda;
+import icai.dtc.isw.Prenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
-import icai.dtc.isw.domain.Outfit;
+import icai.dtc.isw.ui.VentanaDetallePrenda;
+import icai.dtc.isw.Outfit;
 import icai.dtc.isw.GestorOutfits;
 
 // VENTANA PRINCIPAL DE dressB: se abre después de iniciar sesión.
@@ -71,7 +72,7 @@ public class JVentana extends JFrame {
         UIManager.put("TabbedPane.selected", LIMA);  // Cambia el color de la pestaña que esta seleccionada
         UIManager.put("TabbedPane.contentAreaColor", CREMA);
         UIManager.put("TabbedPane.focus", CREMA);    // sin recuadro de foco
-        
+
         JTabbedPane pestanas = new JTabbedPane();
         pestanas.setBackground(CREMA);
         pestanas.setForeground(BURDEOS);
@@ -137,7 +138,7 @@ public class JVentana extends JFrame {
         JButton btnEliminar = crearBoton("Eliminar");
         btnEliminar.addActionListener(e -> eliminarPrendaSeleccionada());
         barra.add(btnEliminar);
-        
+
         // LAU: filtro por categoria, al elegir una, usa mostrarPrendas con las filtradas
         panelFiltro = new PanelFiltroCategorias(todasLasPrendas, this::mostrarPrendas);
         barra.add(panelFiltro);
@@ -199,7 +200,7 @@ public class JVentana extends JFrame {
         JPanel barraInferior = new JPanel(new FlowLayout(FlowLayout.CENTER));
         barraInferior.setBackground(CREMA);
         JButton btnGuardar = crearBoton("Guardar Outfit");
-        
+
         btnGuardar.addActionListener(e -> {
             String nombre = txtNombre.getText().trim();
             Prenda arriba = (Prenda) cbArriba.getSelectedItem();
@@ -216,15 +217,18 @@ public class JVentana extends JFrame {
             prendasSeleccionadas.add(abajo);
             prendasSeleccionadas.add(accesorios);
 
+            // Creamos el objeto Outfit unificado pasándole el nombre y la lista de prendas
+            Outfit nuevoOutfit = new Outfit(nombre, prendasSeleccionadas);
+
             GestorOutfits gestor = new GestorOutfits();
-            if (gestor.guardarNuevoOutfit(nombre, prendasSeleccionadas)) {
+            if (gestor.guardarNuevoOutfit(nombre, prendasSeleccionadas)) { // O gestor.guardarNuevoOutfit(nuevoOutfit) según prefiera su gestor
                 JOptionPane.showMessageDialog(this, "¡Outfit guardado con éxito!");
                 txtNombre.setText("");
             } else {
                 JOptionPane.showMessageDialog(this, "Error al guardar el outfit en la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-        
+
         barraInferior.add(btnGuardar);
         panel.add(barraInferior, BorderLayout.SOUTH);
 
@@ -236,7 +240,7 @@ public class JVentana extends JFrame {
         cbArriba.removeAllItems();
         cbAbajo.removeAllItems();
         cbAccesorios.removeAllItems();
-        
+
         for (Prenda p : todasLasPrendas) {
             cbArriba.addItem(p);
             cbAbajo.addItem(p);
@@ -266,6 +270,18 @@ public class JVentana extends JFrame {
             lista.setSelectionBackground(ROSA);
             lista.setSelectionForeground(BURDEOS);
             listaPrendas = lista;
+            // Se añade un MouseListener a la lista del catálogo para abrir la ventana emergente al hacer doble clic sobre una prenda.
+            listaPrendas.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if (e.getClickCount() == 2) {
+                        Prenda prendaSeleccionada = listaPrendas.getSelectedValue();
+                        if (prendaSeleccionada != null) {
+                            new VentanaDetallePrenda(prendaSeleccionada).setVisible(true);
+                        }
+                    }
+                }
+            });
             panelPrendas.add(new JScrollPane(lista), BorderLayout.CENTER);
         }
 

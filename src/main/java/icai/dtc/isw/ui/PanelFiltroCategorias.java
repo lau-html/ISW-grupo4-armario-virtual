@@ -9,9 +9,10 @@ import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import java.awt.Color;
 
 import icai.dtc.isw.GestorCategorias;
-import icai.dtc.isw.domain.Prenda;
+import icai.dtc.isw.Prenda;
 
 
 // Nota: esto es un panel porque al filtrar aparecera dentro de una ventana, no es una ventana en sí.
@@ -23,6 +24,10 @@ public class PanelFiltroCategorias extends JPanel {
     public interface EscuchadorFiltro { // es como un ActionListener, cuando cambie el filtro llamamos a este metodo con las prendas filtradas 
         void mostrarPrendas(List<Prenda> prendas);
     }
+
+    // Colores corporativos directos para evitar el fallo de importación cruzada
+    private static final Color CREMA = new Color(251, 246, 241);
+    private static final Color BURDEOS = new Color(87, 6, 45);
 
     private final GestorCategorias gestorCategorias = new GestorCategorias(); // llamo al gestor de categorias para poder categorizar y filtrar las prendas
     private final JButton botonCategorias = new JButton(); // boton que abre el menu de categorias para filtrar
@@ -38,8 +43,8 @@ public class PanelFiltroCategorias extends JPanel {
         this.listener = listener; // escuchador para avisar a ventana cuando cambia el filtro
 
         // ajusto la estetica del boton al estilo de  dressB, igual que los demas botones de la ventana
-        botonCategorias.setBackground(JVentana.BURDEOS); // fondo burdeos como los demas botones
-        botonCategorias.setForeground(JVentana.CREMA); 
+        botonCategorias.setBackground(BURDEOS); // fondo burdeos como los demas botones
+        botonCategorias.setForeground(CREMA);
         botonCategorias.setFont(new Font("SansSerif", Font.BOLD, 13));
         botonCategorias.setFocusPainted(false); // quito el recuadro de foco
         botonCategorias.setBorderPainted(false);
@@ -49,7 +54,7 @@ public class PanelFiltroCategorias extends JPanel {
 
         botonCategorias.addActionListener(e -> menuCategorias.show(botonCategorias, 0, botonCategorias.getHeight())); // al pulsar el boton, abre el menu de categorias justo debajo
 
-        setBackground(JVentana.CREMA); 
+        setBackground(CREMA);
         rellenarMenu(); // rellena el menu con las categorias disponibles, definido debajo
         botonCategorias.setText("Categoría: " + categoriaActual); // texto del boton con el filtro activo
         add(botonCategorias);

@@ -1,6 +1,5 @@
 package icai.dtc.isw;
 
-import icai.dtc.isw.domain.Prenda;
 import javax.swing.*;
 import java.util.List;
 
@@ -8,6 +7,7 @@ public class VisualizarNumPrendas {
 
     /**
      * Muestra la interfaz gráfica con el listado y conteo de prendas.
+     *
      * @param armario Lista de objetos Prenda a mostrar en pantalla.
      */
     public static void mostrarVentana(List<Prenda> armario) {
@@ -29,7 +29,6 @@ public class VisualizarNumPrendas {
             areaTexto.append(" No hay ninguna prenda, el catálogo está vacío.\n");
         } else {
             for (Prenda prenda : armario) {
-                // Se ha cambiado getTipo() por getEstilo()
                 areaTexto.append(String.format(" • [%s] %s - Color: %s\n",
                         prenda.getTipo(),
                         prenda.getNombre(),
@@ -44,11 +43,12 @@ public class VisualizarNumPrendas {
     }
 
     public static void main(String[] args) {
-        // Se actualizan los datos de prueba para usar los 7 parámetros de la nueva clase Prenda
+        // Se han ajustado los datos de prueba al constructor unificado de 8 parámetros
+        // (id, nombre, tipo, color, descripcion, estilo, marca, temporada)
         List<Prenda> armario = List.of(
-                new Prenda(1, "Camiseta Nike", "Descripción genérica", "Casual", "Blanco", "Nike", "Verano"),
-                new Prenda(2, "Vaqueros", "Descripción genérica", "Urbano", "Azul", "Levi's", "Atemporal"),
-                new Prenda(3, "Pantalones Deporte", "Descripción genérica", "Deportivo", "Negro", "Adidas", "Atemporal")
+                new Prenda(1, "Camiseta Nike", "Camiseta", "Blanco", "Descripción genérica", "Casual", "Nike", "Verano"),
+                new Prenda(2, "Vaqueros", "Pantalón", "Azul", "Descripción genérica", "Urbano", "Levi's", "Atemporal"),
+                new Prenda(3, "Pantalones Deporte", "Pantalón", "Negro", "Descripción genérica", "Deportivo", "Adidas", "Atemporal")
         );
 
         SwingUtilities.invokeLater(() -> mostrarVentana(armario));

@@ -1,6 +1,5 @@
 package icai.dtc.isw.ui; // Ajusta el paquete según tu proyecto
 
-import icai.dtc.isw.Outfit;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -53,7 +52,7 @@ public class VentanaOutfits extends JFrame {
     private void crearOutfitAleatorio() {
         if (partesArriba.isEmpty() || partesAbajo.isEmpty()) return;
 
-        // 3. Usa java.util.Random para elegir un índice aleatorio de cada lista
+        // Usa java.util.Random para elegir un índice aleatorio de cada lista
         Random random = new Random();
         int indexArriba = random.nextInt(partesArriba.size());
         int indexAbajo = random.nextInt(partesAbajo.size());
@@ -62,7 +61,6 @@ public class VentanaOutfits extends JFrame {
         String prendaAbajo = partesAbajo.get(indexAbajo);
 
         // Mostrar combinaciones juntas
-        Outfit outfitRandom = new Outfit("Outfit Generado", prendaArriba, prendaAbajo);
-        lblResultado.setText("Outfit: " + outfitRandom.getParteArriba() + " + " + outfitRandom.getParteAbajo());
+        lblResultado.setText("Outfit: " + prendaArriba + " + " + prendaAbajo);
     }
 }

@@ -1,11 +1,10 @@
 package icai.dtc.isw;
 
 import java.util.ArrayList;
-import icai.dtc.isw.domain.Prenda;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function; // para el método filtradoPor, puede recibir un getter de Prenda como parametro directamente
+import java.util.function.Function; // para el metodo filtradoPor, puede recibir un getter de Prenda como parametro directamente
 
 public class GestorCategorias { // SPRINT 1: FILTRAR SOLO POR TIPO DE ROPA, ESCALABLE A FILTRAR POR ATRIBUTOS Y A CREAR NUEVAS CATEGORIAS
 
