@@ -147,8 +147,8 @@ public class VentanaDetallePrenda extends JDialog {
         dialogMensaje.setLocationRelativeTo(this);
         dialogMensaje.setVisible(true);
 
-        // Temporizador ajustado a 2000 ms (2 segundos)
-        Timer timer = new Timer(2000, evt -> dialogMensaje.dispose());
+        // Temporizador ajustado a 1500 ms (1,5 segundos)
+        Timer timer = new Timer(1500, evt -> dialogMensaje.dispose());
         timer.setRepeats(false);
         timer.start();
     }

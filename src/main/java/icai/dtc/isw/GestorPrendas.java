@@ -1,7 +1,6 @@
 package icai.dtc.isw;
 
 import java.util.List;
-import icai.dtc.isw.domain.Prenda; // Importación necesaria para que reconozca el objeto Prenda
 
 public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS
 

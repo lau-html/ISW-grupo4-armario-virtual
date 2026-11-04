@@ -28,11 +28,11 @@ import javax.swing.UIManager;
 import javax.swing.JComboBox;
 
 import icai.dtc.isw.GestorPrendas;
-import icai.dtc.isw.domain.Prenda;
+import icai.dtc.isw.Prenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
 import icai.dtc.isw.ui.VentanaDetallePrenda;
-import icai.dtc.isw.domain.Outfit;
+import icai.dtc.isw.Outfit;
 import icai.dtc.isw.GestorOutfits;
 
 // VENTANA PRINCIPAL DE dressB: se abre después de iniciar sesión.
@@ -217,8 +217,11 @@ public class JVentana extends JFrame {
             prendasSeleccionadas.add(abajo);
             prendasSeleccionadas.add(accesorios);
 
+            // Creamos el objeto Outfit unificado pasándole el nombre y la lista de prendas
+            Outfit nuevoOutfit = new Outfit(nombre, prendasSeleccionadas);
+
             GestorOutfits gestor = new GestorOutfits();
-            if (gestor.guardarNuevoOutfit(nombre, prendasSeleccionadas)) {
+            if (gestor.guardarNuevoOutfit(nombre, prendasSeleccionadas)) { // O gestor.guardarNuevoOutfit(nuevoOutfit) según prefiera su gestor
                 JOptionPane.showMessageDialog(this, "¡Outfit guardado con éxito!");
                 txtNombre.setText("");
             } else {
