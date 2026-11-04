@@ -47,49 +47,30 @@ public class VentanaLogin extends JFrame {
 
         add(panel);
 
-        // Login
-        // Boton Iniciar Sesion: valida entradas, autentica y abre la ventana principal
+        // Boton Iniciar Sesion: llama al metodo general de validacion
         btnLogin.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String email = txtEmail.getText().trim();
-                String password = new String(txtPassword.getPassword()).trim();
+                realizarLogin();
+            }
+        });
 
-                if (email.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(VentanaLogin.this,
-                            "Introduce correo y contraseña.",
-                            "Campos incompletos",
-                            JOptionPane.WARNING_MESSAGE);
-                    return;
+        // Permitir iniciar sesión al pulsar ENTER en el campo de texto del email
+        txtEmail.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    realizarLogin();
                 }
+            }
+        });
 
-                try {
-                    Usuario usuario = gestorUsuarios.login(email, password);
-                    if (usuario != null) {
-                        // Guardar usuario en sesión global para el aislamiento del armario
-                        SesionUsuario.setUsuarioLogueado(usuario);
-
-                        JOptionPane.showMessageDialog(VentanaLogin.this,
-                                "Bienvenido/a, " + usuario.getEmail(),
-                                "Sesión iniciada",
-                                JOptionPane.INFORMATION_MESSAGE);
-
-                        dispose(); // Cerrar ventana de login
-
-                        // Abrir la ventana principal de prendas (JVentana)
-                        new JVentana().setVisible(true);
-                    }
-                } catch (IllegalArgumentException ex) {
-                    // Con las credenciales erróneas se muestra un error
-                    JOptionPane.showMessageDialog(VentanaLogin.this,
-                            ex.getMessage(),
-                            "Error de autenticación",
-                            JOptionPane.ERROR_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(VentanaLogin.this,
-                            "Error de conexión: " + ex.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+        // Permitir iniciar sesión al pulsar ENTER en el campo de contraseña
+        txtPassword.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyPressed(java.awt.event.KeyEvent e) {
+                if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    realizarLogin();
                 }
             }
         });
@@ -102,6 +83,49 @@ public class VentanaLogin extends JFrame {
                 new VentanaRegistro().setVisible(true);
             }
         });
+    }
+
+    // Método centralizado para validar campos y ejecutar el login
+    private void realizarLogin() {
+        String email = txtEmail.getText().trim();
+        String password = new String(txtPassword.getPassword()).trim();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(VentanaLogin.this,
+                    "Introduce correo y contraseña.",
+                    "Campos incompletos",
+                    JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            Usuario usuario = gestorUsuarios.login(email, password);
+            if (usuario != null) {
+                // Guardar usuario en sesión global para el aislamiento del armario
+                SesionUsuario.setUsuarioLogueado(usuario);
+
+                JOptionPane.showMessageDialog(VentanaLogin.this,
+                        "Bienvenido/a, " + usuario.getEmail(),
+                        "Sesión iniciada",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                dispose(); // Cerrar ventana de login
+
+                // Abrir la ventana principal de prendas (JVentana)
+                new JVentana().setVisible(true);
+            }
+        } catch (IllegalArgumentException ex) {
+            // Con las credenciales erróneas se muestra un error
+            JOptionPane.showMessageDialog(VentanaLogin.this,
+                    ex.getMessage(),
+                    "Error de autenticación",
+                    JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(VentanaLogin.this,
+                    "Error de conexión: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     // Metodo main para probar la ventana
