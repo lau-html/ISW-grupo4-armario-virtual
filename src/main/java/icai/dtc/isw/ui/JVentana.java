@@ -50,6 +50,9 @@ public class JVentana extends JFrame {
     private List<Prenda> todasLasPrendas = new ArrayList<>(); // todas las prendas usuario
     private final GestorPrendas gestorPrendas = new GestorPrendas(); // lógica de editar y eliminar
 
+    // SPRINT 2 (bonus): desplegable para ordenar por antigüedad
+    private JComboBox<String> cbOrden = new JComboBox<>(new String[]{"Más recientes", "Más antiguas"});
+
     // Desplegables de la pestaña Outfits
     private JComboBox<Prenda> cbArriba = new JComboBox<>();
     private JComboBox<Prenda> cbAbajo = new JComboBox<>();
@@ -70,7 +73,7 @@ public class JVentana extends JFrame {
         UIManager.put("TabbedPane.selected", LIMA);  // Cambia el color de la pestaña que esta seleccionada
         UIManager.put("TabbedPane.contentAreaColor", CREMA);
         UIManager.put("TabbedPane.focus", CREMA);    // sin recuadro de foco
-        
+
         JTabbedPane pestanas = new JTabbedPane();
         pestanas.setBackground(CREMA);
         pestanas.setForeground(BURDEOS);
@@ -113,6 +116,10 @@ public class JVentana extends JFrame {
 
     // PESTAÑA "MI ARMARIO"
     private JPanel crearPanelArmario() {
+        // SPRINT 2: cargar de la BD las prendas del usuario que ha iniciado sesión
+        // (se hace antes de crear el filtro para que este ya tenga las prendas)
+        recargarPrendasDesdeBD();
+
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(CREMA);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -136,7 +143,7 @@ public class JVentana extends JFrame {
         JButton btnEliminar = crearBoton("Eliminar");
         btnEliminar.addActionListener(e -> eliminarPrendaSeleccionada());
         barra.add(btnEliminar);
-        
+
         // LAU: filtro por categoria, al elegir una, usa mostrarPrendas con las filtradas
         PanelFiltroCategorias panelFiltro = new PanelFiltroCategorias(todasLasPrendas, this::mostrarPrendas);
         barra.add(panelFiltro);
@@ -146,6 +153,13 @@ public class JVentana extends JFrame {
         JButton btnListado = crearBoton("Ver listado");
         btnListado.addActionListener(e -> VisualizarNumPrendas.mostrarVentana((List) prendasActuales));
         barra.add(btnListado);
+
+        // SPRINT 2 (bonus): ordenar por "más recientes" / "más antiguas"
+        cbOrden.addActionListener(e -> {
+            aplicarOrden();
+            mostrarPrendas(todasLasPrendas);
+        });
+        barra.add(cbOrden);
         panel.add(barra, BorderLayout.NORTH);
 
         // Zona donde se muestran las prendas
@@ -153,10 +167,27 @@ public class JVentana extends JFrame {
         panelPrendas.setBackground(CREMA);
         panel.add(panelPrendas, BorderLayout.CENTER);
 
-        // De momento el armario está vacío.
-        mostrarPrendas(new ArrayList<>());
+        // SPRINT 2: se muestran las prendas guardadas del usuario (si no tiene, sale el mensaje de armario vacío)
+        mostrarPrendas(todasLasPrendas);
 
         return panel;
+    }
+
+    // SPRINT 2: vuelve a leer de la BD las prendas del usuario activo.
+    // Se rellena la MISMA lista (clear + addAll) porque PanelFiltroCategorias guarda una referencia a ella.
+    private void recargarPrendasDesdeBD() {
+        todasLasPrendas.clear();
+        todasLasPrendas.addAll(gestorPrendas.cargarPrendasUsuario(true));
+        aplicarOrden();
+    }
+
+    // SPRINT 2 (bonus): ordena todasLasPrendas según lo elegido en el desplegable
+    private void aplicarOrden() {
+        if ("Más antiguas".equals(cbOrden.getSelectedItem())) {
+            gestorPrendas.ordenarMasAntiguas(todasLasPrendas);
+        } else {
+            gestorPrendas.ordenarMasRecientes(todasLasPrendas);
+        }
     }
 
     // PESTAÑA "CREADOR DE OUTFITS"
@@ -199,7 +230,7 @@ public class JVentana extends JFrame {
         JPanel barraInferior = new JPanel(new FlowLayout(FlowLayout.CENTER));
         barraInferior.setBackground(CREMA);
         JButton btnGuardar = crearBoton("Guardar Outfit");
-        
+
         btnGuardar.addActionListener(e -> {
             String nombre = txtNombre.getText().trim();
             Prenda arriba = (Prenda) cbArriba.getSelectedItem();
@@ -224,7 +255,7 @@ public class JVentana extends JFrame {
                 JOptionPane.showMessageDialog(this, "Error al guardar el outfit en la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
-        
+
         barraInferior.add(btnGuardar);
         panel.add(barraInferior, BorderLayout.SOUTH);
 
@@ -236,7 +267,7 @@ public class JVentana extends JFrame {
         cbArriba.removeAllItems();
         cbAbajo.removeAllItems();
         cbAccesorios.removeAllItems();
-        
+
         for (Prenda p : todasLasPrendas) {
             cbArriba.addItem(p);
             cbAbajo.addItem(p);
@@ -272,12 +303,19 @@ public class JVentana extends JFrame {
         panelPrendas.revalidate();
         panelPrendas.repaint();
     }
-    
+
     // Añade una nueva prenda al armario y refresca la vista en texto
+    // SPRINT 2: la prenda se guarda en la BD a nombre del usuario activo y se recarga la lista
+    // (así cada prenda tiene su id y fecha reales de la BD).
     public void agregarPrenda(Prenda nuevaPrenda) {
-        // Asignar un ID incremental si no tiene uno
-        nuevaPrenda.setId(todasLasPrendas.size() + 1);
-        todasLasPrendas.add(nuevaPrenda);
+        boolean guardada = gestorPrendas.guardarPrenda(nuevaPrenda);
+        if (!guardada) {
+            JOptionPane.showMessageDialog(this,
+                    "No se ha podido guardar la prenda en la base de datos.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        recargarPrendasDesdeBD();
         mostrarPrendas(todasLasPrendas);
         actualizarDesplegables(); // Se actualizan los desplegables
     }

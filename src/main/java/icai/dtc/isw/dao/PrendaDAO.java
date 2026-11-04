@@ -1,6 +1,5 @@
 package icai.dtc.isw.dao;
 
-import icai.dtc.isw.SesionUsuario;
 import icai.dtc.isw.domain.Prenda;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,16 +11,12 @@ import java.util.ArrayList;
 public class PrendaDAO {
 
     /**
-     * Guarda la prenda asociada a su dueño.
-     * SPRINT 2: el email sale de prenda.getUsuarioEmail(); si viene vacío,
-     * se toma el usuario activo de SesionUsuario.getUsuarioActual().
+     * Guarda la prenda asociada a su dueño (prenda.getUsuarioEmail()).
+     * SPRINT 2: GestorPrendas.guardarPrenda(...) rellena el email con SesionUsuario.getUsuarioActual().
      * (Misma firma que en el Sprint 1, así que las llamadas existentes siguen compilando.)
      */
     public boolean registrarPrenda(Prenda prenda) {
         String email = prenda.getUsuarioEmail();
-        if ((email == null || email.isBlank()) && SesionUsuario.haySesion()) {
-            email = SesionUsuario.getUsuarioActual().getEmail();
-        }
         if (email == null || email.isBlank()) {
             System.out.println("No se puede guardar la prenda: no hay ningún usuario con sesión iniciada.");
             return false;

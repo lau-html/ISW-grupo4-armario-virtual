@@ -3,10 +3,10 @@ package icai.dtc.isw;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
-import icai.dtc.isw.client.Client;
+import icai.dtc.isw.dao.PrendaDAO;
+import icai.dtc.isw.ui.SesionUsuario;
 import icai.dtc.isw.domain.Prenda; // Importación necesaria para que reconozca el objeto Prenda
 
 public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS  ·  SPRINT 2: PRENDAS POR USUARIO
@@ -43,28 +43,24 @@ public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS  ·  SPRINT 
 
     // ======================= SPRINT 2 =======================
 
+    private final PrendaDAO prendaDAO = new PrendaDAO();
+
     /**
-     * Pide al servidor las prendas del usuario con sesión iniciada.
-     * Llamar justo después de un login correcto (y cada vez que haya que refrescar la lista).
+     * Carga de la BD las prendas del usuario con sesión iniciada
+     * (incluidas las guardadas en sesiones anteriores).
      * masRecientes = true -> más recientes primero; false -> más antiguas primero.
      */
-    @SuppressWarnings("unchecked")
     public ArrayList<Prenda> cargarPrendasUsuario(boolean masRecientes) {
         if (!SesionUsuario.haySesion()) {
             System.out.println("No hay sesión iniciada: no se cargan prendas.");
             return new ArrayList<>();
         }
-        HashMap<String, Object> session = new HashMap<>();
-        session.put("usuarioEmail", SesionUsuario.getUsuarioActual().getEmail());
-        session.put("masRecientes", masRecientes);
-
-        HashMap<String, Object> respuesta = new Client().sentMessage("/getPrendasUsuario", session);
-        ArrayList<Prenda> prendas = (ArrayList<Prenda>) respuesta.get("Prendas");
-        return prendas != null ? prendas : new ArrayList<>();
+        String email = SesionUsuario.getUsuarioActual().getEmail();
+        return prendaDAO.getPrendasUsuario(email, masRecientes);
     }
 
     /**
-     * Envía una prenda al servidor para guardarla en la BD a nombre del usuario activo.
+     * Guarda la prenda en la BD a nombre del usuario activo (SesionUsuario.getUsuarioActual()).
      * Devuelve true si se ha guardado.
      */
     public boolean guardarPrenda(Prenda prenda) {
@@ -73,12 +69,7 @@ public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS  ·  SPRINT 
             return false;
         }
         prenda.setUsuarioEmail(SesionUsuario.getUsuarioActual().getEmail());
-
-        HashMap<String, Object> session = new HashMap<>();
-        session.put("Prenda", prenda);
-
-        HashMap<String, Object> respuesta = new Client().sentMessage("/guardarPrenda", session);
-        return Boolean.TRUE.equals(respuesta.get("ok"));
+        return prendaDAO.registrarPrenda(prenda);
     }
 
     // BONUS: ordenar una lista ya cargada sin volver a consultar la BD (Comparator).
