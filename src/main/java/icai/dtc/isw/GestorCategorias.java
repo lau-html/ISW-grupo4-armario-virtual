@@ -1,7 +1,6 @@
 package icai.dtc.isw;
 
 import java.util.ArrayList;
-import icai.dtc.isw.domain.Prenda;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

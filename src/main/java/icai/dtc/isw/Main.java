@@ -1,7 +1,7 @@
 package icai.dtc.isw;
 
 import java.io.Serializable;
-import icai.dtc.isw.domain.Prenda;
+import icai.dtc.isw.Prenda;
 
 public class Main implements Serializable {
 
