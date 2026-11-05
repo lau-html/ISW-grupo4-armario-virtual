@@ -14,7 +14,7 @@ import icai.dtc.isw.configuration.PropertiesISW;
 import icai.dtc.isw.controler.CustomerControler;
 import icai.dtc.isw.dao.PrendaDAO;
 import icai.dtc.isw.domain.Customer;
-import icai.dtc.isw.domain.Prenda;
+import icai.dtc.isw.Prenda;
 import icai.dtc.isw.message.Message;
 
 public class SocketServer extends Thread {
@@ -78,7 +78,7 @@ public class SocketServer extends Thread {
 					Prenda prenda = (Prenda) session.get("Prenda");
 					boolean guardada = false;
 					if (prenda != null) {
-						guardada = new PrendaDAO().registrarPrenda(prenda);
+						guardada = new PrendaDAO().guardarPrendaUsuario(prenda);
 					}
 					mensajeOut.setContext("/guardarPrendaResponse");
 					session.put("ok", guardada);
@@ -94,7 +94,7 @@ public class SocketServer extends Thread {
 					Boolean masRecientes = (Boolean) session.get("masRecientes");
 					if (masRecientes == null) masRecientes = true; // por defecto: más recientes primero
 
-					ArrayList<Prenda> prendas = new PrendaDAO().getPrendasUsuario(usuarioEmail, masRecientes);
+					ArrayList<Prenda> prendas = new ArrayList<>(new PrendaDAO().getPrendasUsuario(usuarioEmail, masRecientes));
 					mensajeOut.setContext("/getPrendasUsuarioResponse");
 					session.put("Prendas", prendas);
 					mensajeOut.setSession(session);
@@ -126,7 +126,7 @@ public class SocketServer extends Thread {
 			}*/
 			// create an object output stream from the output stream so we can send an object through it
 			/*ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
-			
+
 			//Create the object to send
 			String cadena=((String)mensaje.getSession().get("Nombre"));
 			cadena+=" añado información";

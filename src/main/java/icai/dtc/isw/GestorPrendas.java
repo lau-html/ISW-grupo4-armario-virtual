@@ -7,10 +7,8 @@ import java.util.List;
 
 import icai.dtc.isw.dao.PrendaDAO;
 import icai.dtc.isw.ui.SesionUsuario;
-import icai.dtc.isw.domain.Prenda; // Importación necesaria para que reconozca el objeto Prenda
 
-public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS  ·  SPRINT 2: PRENDAS POR USUARIO
-
+public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
     // Busca una prenda por su id. Devuelve null si no existe.
     public Prenda buscarPorId(List<Prenda> prendas, int id) {
         for (Prenda prenda : prendas) {
@@ -29,19 +27,18 @@ public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS  ·  SPRINT 
             return false;
         }
         prenda.setNombre(nombre);
-        prenda.setEstilo(tipo);
+        prenda.setTipo(tipo);
         prenda.setColor(color);
         return true;
     }
 
     // Elimina la prenda con ese id.
     // Devuelve true si la ha encontrado y borrado, false si no existe.
-    // CORRECCIÓN: Se han quitado los parámetros "nombre", "tipo" y "color" que sobraban
     public boolean eliminarPrenda(List<Prenda> prendas, int id) {
         return prendas.removeIf(prenda -> prenda.getId() == id);
     }
 
-    // ======================= SPRINT 2 =======================
+    // ======================= SPRINT 2: PRENDAS POR USUARIO =======================
 
     private final PrendaDAO prendaDAO = new PrendaDAO();
 
@@ -50,7 +47,7 @@ public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS  ·  SPRINT 
      * (incluidas las guardadas en sesiones anteriores).
      * masRecientes = true -> más recientes primero; false -> más antiguas primero.
      */
-    public ArrayList<Prenda> cargarPrendasUsuario(boolean masRecientes) {
+    public List<Prenda> cargarPrendasUsuario(boolean masRecientes) {
         if (!SesionUsuario.haySesion()) {
             System.out.println("No hay sesión iniciada: no se cargan prendas.");
             return new ArrayList<>();
@@ -69,11 +66,11 @@ public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS  ·  SPRINT 
             return false;
         }
         prenda.setUsuarioEmail(SesionUsuario.getUsuarioActual().getEmail());
-        return prendaDAO.registrarPrenda(prenda);
+        return prendaDAO.guardarPrendaUsuario(prenda);
     }
 
     // BONUS: ordenar una lista ya cargada sin volver a consultar la BD (Comparator).
-    // Las prendas sin fecha (p. ej. las del mock) se quedan al final.
+    // Las prendas sin fecha (p. ej. las de prueba en memoria) se quedan al final.
     public void ordenarMasAntiguas(List<Prenda> prendas) {
         prendas.sort(Comparator.comparing(Prenda::getFechaCreacion,
                         Comparator.nullsLast(Comparator.<LocalDateTime>naturalOrder()))
