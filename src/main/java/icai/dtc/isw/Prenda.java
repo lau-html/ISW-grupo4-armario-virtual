@@ -1,6 +1,7 @@
 package icai.dtc.isw;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 public class Prenda implements Serializable {
 
@@ -15,6 +16,10 @@ public class Prenda implements Serializable {
     private String estilo;
     private String marca;
     private String temporada;
+
+    // SPRINT 2: dueño de la prenda y fecha en que se guardó en la BD
+    private String usuarioEmail;
+    private LocalDateTime fechaCreacion;
 
     // Constructor con campos que estan en el formulario
     public Prenda(int id, String nombre, String tipo, String color, String descripcion, String estilo, String marca, String temporada) {
@@ -37,7 +42,7 @@ public class Prenda implements Serializable {
     }
 
 
-    // Constructor con id pero sin campos nuevos del formulario (lo usan los tests de GestorPrendas) 
+    // Constructor con id pero sin campos nuevos del formulario (lo usan los tests de GestorPrendas)
     // Lau: da error si lo eliminamos (porque los tests de GestorPrendas lo usan de momento)
     public Prenda(int id, String nombre, String tipo, String color) {
         this.id = id;
@@ -101,6 +106,27 @@ public class Prenda implements Serializable {
 
     public void setTemporada(String temporada) {
         this.temporada = temporada;
+    }
+
+    // SPRINT 2
+    public String getEstilo() {
+        return estilo;
+    }
+
+    public String getUsuarioEmail() {
+        return usuarioEmail;
+    }
+
+    public void setUsuarioEmail(String usuarioEmail) {
+        this.usuarioEmail = usuarioEmail;
+    }
+
+    public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+    public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
     }
 
     @Override

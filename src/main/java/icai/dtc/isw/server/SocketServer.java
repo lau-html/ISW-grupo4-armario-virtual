@@ -12,7 +12,9 @@ import java.util.HashMap;
 
 import icai.dtc.isw.configuration.PropertiesISW;
 import icai.dtc.isw.controler.CustomerControler;
+import icai.dtc.isw.dao.PrendaDAO;
 import icai.dtc.isw.domain.Customer;
+import icai.dtc.isw.Prenda;
 import icai.dtc.isw.message.Message;
 
 public class SocketServer extends Thread {
@@ -33,26 +35,26 @@ public class SocketServer extends Thread {
 		try {
 			in = socket.getInputStream();
 			out = socket.getOutputStream();
-			
+
 			//first read the object that has been sent
 			ObjectInputStream objectInputStream = new ObjectInputStream(in);
-		    Message mensajeIn= (Message)objectInputStream.readObject();
-		    //Object to return informations 
-		    ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
-		    Message mensajeOut=new Message();
+			Message mensajeIn= (Message)objectInputStream.readObject();
+			//Object to return informations
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
+			Message mensajeOut=new Message();
 			HashMap<String,Object> session=mensajeIn.getSession();
 			CustomerControler customerControler;
-		    switch (mensajeIn.getContext()) {
-		    	case "/getCustomers":
-		    		customerControler=new CustomerControler();
-		    		ArrayList<Customer> lista=new ArrayList<Customer>();
-		    		customerControler.getCustomers(lista);
-		    		mensajeOut.setContext("/getCustomersResponse");
-		    		//HashMap<String,Object> session=new HashMap<String, Object>();
-		    		session.put("Customers",lista);
-		    		mensajeOut.setSession(session);
-		    		objectOutputStream.writeObject(mensajeOut);		    		
-		    		break;
+			switch (mensajeIn.getContext()) {
+				case "/getCustomers":
+					customerControler=new CustomerControler();
+					ArrayList<Customer> lista=new ArrayList<Customer>();
+					customerControler.getCustomers(lista);
+					mensajeOut.setContext("/getCustomersResponse");
+					//HashMap<String,Object> session=new HashMap<String, Object>();
+					session.put("Customers",lista);
+					mensajeOut.setSession(session);
+					objectOutputStream.writeObject(mensajeOut);
+					break;
 				case "/getCustomer":
 					int id= (int) session.get("id");
 					customerControler=new CustomerControler();
@@ -68,19 +70,52 @@ public class SocketServer extends Thread {
 					mensajeOut.setSession(session);
 					objectOutputStream.writeObject(mensajeOut);
 					break;
-		    	
-		    	default:
-		    		System.out.println("\nParámetro no encontrado");
-		    		break;
-		    }
-		    
-		    //Lógica del controlador 
-		    //System.out.println("\n1.- He leído: "+mensaje.getContext());
-		    //System.out.println("\n2.- He leído: "+(String)mensaje.getSession().get("Nombre"));
-		    
-		    
-		    
-		    //Prueba para esperar
+
+				// ===================== SPRINT 2 · PRENDAS POR USUARIO =====================
+
+				// Guarda una prenda. El cliente manda en la session: "Prenda" (con usuarioEmail relleno).
+				case "/guardarPrenda": {
+					Prenda prenda = (Prenda) session.get("Prenda");
+					boolean guardada = false;
+					if (prenda != null) {
+						guardada = new PrendaDAO().guardarPrendaUsuario(prenda);
+					}
+					mensajeOut.setContext("/guardarPrendaResponse");
+					session.put("ok", guardada);
+					mensajeOut.setSession(session);
+					objectOutputStream.writeObject(mensajeOut);
+					break;
+				}
+
+				// Devuelve solo las prendas del usuario (incluidas las de sesiones anteriores).
+				// El cliente manda en la session: "usuarioEmail" y, opcional, "masRecientes" (Boolean).
+				case "/getPrendasUsuario": {
+					String usuarioEmail = (String) session.get("usuarioEmail");
+					Boolean masRecientes = (Boolean) session.get("masRecientes");
+					if (masRecientes == null) masRecientes = true; // por defecto: más recientes primero
+
+					ArrayList<Prenda> prendas = new ArrayList<>(new PrendaDAO().getPrendasUsuario(usuarioEmail, masRecientes));
+					mensajeOut.setContext("/getPrendasUsuarioResponse");
+					session.put("Prendas", prendas);
+					mensajeOut.setSession(session);
+					objectOutputStream.writeObject(mensajeOut);
+					break;
+				}
+
+				// ==========================================================================
+
+				default:
+					System.out.println("\nParámetro no encontrado");
+					break;
+			}
+
+			//Lógica del controlador
+			//System.out.println("\n1.- He leído: "+mensaje.getContext());
+			//System.out.println("\n2.- He leído: "+(String)mensaje.getSession().get("Nombre"));
+
+
+
+			//Prueba para esperar
 		    /*try {
 		    	System.out.println("Me duermo");
 				Thread.sleep(15000);
@@ -91,7 +126,7 @@ public class SocketServer extends Thread {
 			}*/
 			// create an object output stream from the output stream so we can send an object through it
 			/*ObjectOutputStream objectOutputStream = new ObjectOutputStream(out);
-			
+
 			//Create the object to send
 			String cadena=((String)mensaje.getSession().get("Nombre"));
 			cadena+=" añado información";

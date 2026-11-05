@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.JComboBox;
 
 import icai.dtc.isw.GestorPrendas;
 import icai.dtc.isw.Prenda;
@@ -47,6 +48,9 @@ public class JVentana extends JFrame {
     private List<Prenda> prendasActuales = new ArrayList<>(); // prendas que se están mostrando (pueden ser todas o solo filtradas)
     private List<Prenda> todasLasPrendas = new ArrayList<>(); // todas las prendas usuario
     private final GestorPrendas gestorPrendas = new GestorPrendas(); // lógica de editar y eliminar
+
+    // SPRINT 2 (bonus): desplegable para ordenar por antigüedad
+    private JComboBox<String> cbOrden = new JComboBox<>(new String[]{"Más recientes", "Más antiguas"});
 
     public JVentana() {
         super("dressB");
@@ -104,6 +108,10 @@ public class JVentana extends JFrame {
 
     // PESTAÑA "MI ARMARIO"
     private JPanel crearPanelArmario() {
+        // SPRINT 2: cargar de la BD las prendas del usuario que ha iniciado sesión
+        // (antes de crear el filtro, para que el filtro ya vea sus categorías)
+        recargarPrendasDesdeBD();
+
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(CREMA);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -136,6 +144,13 @@ public class JVentana extends JFrame {
         JButton btnListado = crearBoton("Ver listado");
         btnListado.addActionListener(e -> VisualizarNumPrendas.mostrarVentana( (List) prendasActuales));
         barra.add(btnListado);
+
+        // SPRINT 2 (bonus): ordenar por "más recientes" / "más antiguas"
+        cbOrden.addActionListener(e -> {
+            aplicarOrden();
+            mostrarPrendas(todasLasPrendas);
+        });
+        barra.add(cbOrden);
         panel.add(barra, BorderLayout.NORTH);
 
         // Zona donde se muestran las prendas
@@ -143,11 +158,27 @@ public class JVentana extends JFrame {
         panelPrendas.setBackground(CREMA);
         panel.add(panelPrendas, BorderLayout.CENTER);
 
-        // De momento el armario está vacío.
-        // Cuando esté el listado con la base de datos (Ver listado), aquí se cargarán las prendas del usuario.
-        mostrarPrendas(new ArrayList<>());
+        // SPRINT 2: se muestran las prendas guardadas del usuario (si no tiene, sale el mensaje de armario vacío)
+        mostrarPrendas(todasLasPrendas);
 
         return panel;
+    }
+
+    // SPRINT 2: vuelve a leer de la BD las prendas del usuario activo.
+    // Se rellena la MISMA lista (clear + addAll) porque PanelFiltroCategorias guarda una referencia a ella.
+    private void recargarPrendasDesdeBD() {
+        todasLasPrendas.clear();
+        todasLasPrendas.addAll(gestorPrendas.cargarPrendasUsuario(true));
+        aplicarOrden();
+    }
+
+    // SPRINT 2 (bonus): ordena todasLasPrendas según lo elegido en el desplegable
+    private void aplicarOrden() {
+        if ("Más antiguas".equals(cbOrden.getSelectedItem())) {
+            gestorPrendas.ordenarMasAntiguas(todasLasPrendas);
+        } else {
+            gestorPrendas.ordenarMasRecientes(todasLasPrendas);
+        }
     }
 
     // Muestra en "Mi armario" la lista de prendas que se le pase.
@@ -179,12 +210,19 @@ public class JVentana extends JFrame {
         panelPrendas.revalidate();
         panelPrendas.repaint();
     }
-    
+
     // Añade una nueva prenda al armario y refresca la vista en texto
+    // SPRINT 2: la prenda se guarda en la BD a nombre del usuario activo y se recarga la lista
+    // (así cada prenda tiene su id y fecha reales de la BD).
     public void agregarPrenda(Prenda nuevaPrenda) {
-        // Asignar un ID incremental si no tiene uno
-        nuevaPrenda.setId(todasLasPrendas.size() + 1);
-        todasLasPrendas.add(nuevaPrenda);
+        boolean guardada = gestorPrendas.guardarPrenda(nuevaPrenda);
+        if (!guardada) {
+            JOptionPane.showMessageDialog(this,
+                    "No se ha podido guardar la prenda en la base de datos.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        recargarPrendasDesdeBD();
         mostrarPrendas(todasLasPrendas);
     }
 
