@@ -119,4 +119,46 @@ public class PrendaDAO {
         }
         return prendas;
     }
+
+    /**
+     * SPRINT 2: guarda en la BD los cambios de una prenda (nombre, tipo y color).
+     * Solo modifica la prenda si pertenece a ese usuario (así nadie puede editar prendas ajenas).
+     * Devuelve true si se ha actualizado.
+     */
+    public boolean actualizarPrenda(int id, String nombre, String tipo, String color, String usuarioEmail) {
+        String sql = "UPDATE prenda SET nombre = ?, tipo = ?, color = ? WHERE id = ? AND usuario_email = ?";
+        Connection conn = ConnectionDAO.getInstance().getConnection();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, nombre);
+            pstmt.setString(2, tipo);
+            pstmt.setString(3, color);
+            pstmt.setInt(4, id);
+            pstmt.setString(5, usuarioEmail);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar la prenda " + id);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * SPRINT 2: borra la prenda de la BD.
+     * Solo la borra si pertenece a ese usuario. Devuelve true si se ha borrado.
+     */
+    public boolean eliminarPrenda(int id, String usuarioEmail) {
+        String sql = "DELETE FROM prenda WHERE id = ? AND usuario_email = ?";
+        Connection conn = ConnectionDAO.getInstance().getConnection();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.setString(2, usuarioEmail);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al eliminar la prenda " + id);
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
