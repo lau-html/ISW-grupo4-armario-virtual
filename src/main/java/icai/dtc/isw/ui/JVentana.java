@@ -327,7 +327,7 @@ public class JVentana extends JFrame {
         }
     }
 
-    // Permite cambiar el nombre, el tipo y el color de la prenda seleccionada
+    // Permite cambiar el nombre, el tipo y el color y la foto de la prenda seleccionada
     private void editarPrendaSeleccionada() {
         Prenda prenda = obtenerPrendaSeleccionada();
         if (prenda == null) {
@@ -336,17 +336,33 @@ public class JVentana extends JFrame {
         JTextField txtNombre = new JTextField(prenda.getNombre());
         JTextField txtTipo = new JTextField(prenda.getTipo());
         JTextField txtColor = new JTextField(prenda.getColor());
+        // Foto: se guarda en un array para poder cambiarla desde el botón
+        String[] rutaFoto = {prenda.getRutaFoto()};
+        JLabel lblFoto = new JLabel(SelectorFoto.nombreArchivo(rutaFoto[0]));
+        JButton btnFoto = new JButton("Cambiar foto...");
+        btnFoto.addActionListener(e -> {
+            String ruta = SelectorFoto.elegirFoto(this);
+            if (ruta != null) {
+                rutaFoto[0] = ruta;
+                lblFoto.setText(SelectorFoto.nombreArchivo(ruta));
+            }
+        });
+        JPanel panelFoto = new JPanel(new BorderLayout(5, 0));
+        panelFoto.add(btnFoto, BorderLayout.WEST);
+        panelFoto.add(lblFoto, BorderLayout.CENTER);
 
-        JPanel formulario = new JPanel(new GridLayout(3, 2, 8, 8));
+        JPanel formulario = new JPanel(new GridLayout(4, 2, 8, 8));
         formulario.add(new JLabel("Nombre:")); formulario.add(txtNombre);
         formulario.add(new JLabel("Tipo:"));   formulario.add(txtTipo);
         formulario.add(new JLabel("Color:"));  formulario.add(txtColor);
+        formulario.add(new JLabel("Foto:"));   formulario.add(panelFoto);
 
         int respuesta = JOptionPane.showConfirmDialog(this, formulario,
                 "Editar prenda", JOptionPane.OK_CANCEL_OPTION);
         if (respuesta == JOptionPane.OK_OPTION) {
             gestorPrendas.editarPrenda(todasLasPrendas, prenda.getId(),
                     txtNombre.getText(), txtTipo.getText(), txtColor.getText());
+            prenda.setRutaFoto(rutaFoto[0]);
             mostrarPrendas(todasLasPrendas); // refrescar la lista
             actualizarDesplegables();        // refrescar desplegables
             panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la prenda editada

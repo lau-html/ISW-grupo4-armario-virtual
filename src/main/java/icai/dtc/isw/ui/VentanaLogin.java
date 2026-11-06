@@ -19,7 +19,7 @@ public class VentanaLogin extends JFrame {
     public VentanaLogin() {
         gestorUsuarios = new GestorUsuarios();
 
-        setTitle("Inicio de Sesión - Armario Virtual");
+        setTitle("dressB - Inicio de sesión");
         setSize(400, 260);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
