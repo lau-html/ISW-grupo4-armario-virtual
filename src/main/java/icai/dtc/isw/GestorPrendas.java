@@ -69,6 +69,38 @@ public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
         return prendaDAO.guardarPrendaUsuario(prenda);
     }
 
+    /**
+     * SPRINT 2: edita la prenda en la BD y, si va bien, también en la lista en memoria.
+     * Devuelve true si se ha guardado el cambio.
+     */
+    public boolean editarPrendaGuardada(List<Prenda> prendas, int id, String nombre, String tipo, String color) {
+        if (!SesionUsuario.haySesion()) {
+            System.out.println("No hay sesión iniciada: no se puede editar la prenda.");
+            return false;
+        }
+        String email = SesionUsuario.getUsuarioActual().getEmail();
+        if (!prendaDAO.actualizarPrenda(id, nombre, tipo, color, email)) {
+            return false;
+        }
+        return editarPrenda(prendas, id, nombre, tipo, color);
+    }
+
+    /**
+     * SPRINT 2: borra la prenda de la BD y, si va bien, también de la lista en memoria.
+     * Devuelve true si se ha borrado.
+     */
+    public boolean eliminarPrendaGuardada(List<Prenda> prendas, int id) {
+        if (!SesionUsuario.haySesion()) {
+            System.out.println("No hay sesión iniciada: no se puede eliminar la prenda.");
+            return false;
+        }
+        String email = SesionUsuario.getUsuarioActual().getEmail();
+        if (!prendaDAO.eliminarPrenda(id, email)) {
+            return false;
+        }
+        return eliminarPrenda(prendas, id);
+    }
+
     // BONUS: ordenar una lista ya cargada sin volver a consultar la BD (Comparator).
     // Las prendas sin fecha (p. ej. las de prueba en memoria) se quedan al final.
     public void ordenarMasAntiguas(List<Prenda> prendas) {

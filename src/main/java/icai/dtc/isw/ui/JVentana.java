@@ -247,7 +247,14 @@ public class JVentana extends JFrame {
                 "¿Seguro que quieres eliminar \"" + prenda.getNombre() + "\"?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
         if (respuesta == JOptionPane.YES_OPTION) {
-            gestorPrendas.eliminarPrenda(todasLasPrendas, prenda.getId());
+            // SPRINT 2: se borra también de la base de datos
+            boolean borrada = gestorPrendas.eliminarPrendaGuardada(todasLasPrendas, prenda.getId());
+            if (!borrada) {
+                JOptionPane.showMessageDialog(this,
+                        "No se ha podido eliminar la prenda de la base de datos.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             mostrarPrendas(todasLasPrendas); // refrescar la lista
         }
     }
@@ -270,8 +277,15 @@ public class JVentana extends JFrame {
         int respuesta = JOptionPane.showConfirmDialog(this, formulario,
                 "Editar prenda", JOptionPane.OK_CANCEL_OPTION);
         if (respuesta == JOptionPane.OK_OPTION) {
-            gestorPrendas.editarPrenda(todasLasPrendas, prenda.getId(),
-                    txtNombre.getText(), txtTipo.getText(), txtColor.getText());
+            // SPRINT 2: el cambio se guarda también en la base de datos
+            boolean editada = gestorPrendas.editarPrendaGuardada(todasLasPrendas, prenda.getId(),
+                    txtNombre.getText().trim(), txtTipo.getText().trim(), txtColor.getText().trim());
+            if (!editada) {
+                JOptionPane.showMessageDialog(this,
+                        "No se ha podido guardar el cambio en la base de datos.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             mostrarPrendas(todasLasPrendas); // refrescar la lista
         }
     }
