@@ -14,6 +14,9 @@ public class FormularioPrenda extends JFrame {
     private JComboBox<String> cbTipo, cbEstilo, cbTemporada;
     private JButton btnGuardar;
     private JVentana ventanaPrincipal;
+    private JButton btnFoto;            // botón para elegir la foto de la prenda
+    private JLabel lblFoto;             // muestra el nombre de la foto elegida
+    private String rutaFotoSeleccionada; // ruta de la foto elegida (null si no hay)
 
     // Constructor vacío por si se abre de forma independiente en pruebas
     public FormularioPrenda() {
@@ -25,10 +28,10 @@ public class FormularioPrenda extends JFrame {
         this.ventanaPrincipal = ventanaPrincipal;
 
         // Configuración básica de la ventana
-        setTitle("Registro de Nueva Prenda");
-        setSize(400, 380);
+        setTitle("dressB - Nueva prenda");
+        setSize(420, 430);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new GridLayout(8, 2, 10, 10)); // 8 filas y 2 columnas
+        setLayout(new GridLayout(9, 2, 10, 10)); // 9 filas y 2 columnas
 
         // 2. Inicializar los campos de texto y desplegables
         txtNombre = new JTextField();
@@ -60,6 +63,21 @@ public class FormularioPrenda extends JFrame {
         add(txtMarca);
         add(new JLabel(" Temporada:"));
         add(cbTemporada);
+        // Foto de la prenda: botón para elegirla y etiqueta con el nombre del archivo
+        btnFoto = new JButton("Seleccionar foto...");
+        lblFoto = new JLabel("Sin foto");
+        btnFoto.addActionListener(e -> {
+            String ruta = SelectorFoto.elegirFoto(this);
+            if (ruta != null) {
+                rutaFotoSeleccionada = ruta;
+                lblFoto.setText(SelectorFoto.nombreArchivo(ruta));
+            }
+        });
+        JPanel panelFoto = new JPanel(new BorderLayout(5, 0));
+        panelFoto.add(btnFoto, BorderLayout.WEST);
+        panelFoto.add(lblFoto, BorderLayout.CENTER);
+        add(new JLabel(" Foto:"));
+        add(panelFoto);
 
         // 4. Configurar el botón de guardar
         btnGuardar = new JButton("Guardar Prenda");
@@ -95,7 +113,7 @@ public class FormularioPrenda extends JFrame {
         // Usando el constructor para prendas nuevas (sin el 0 inicial)
         Prenda nuevaPrenda = new Prenda(nombre, descripcion, tipo, color, estilo, marca, temporada);        // Usando el constructor con ID (pasando 0)
         //Prenda nuevaPrenda = new Prenda(0, nombre, descripcion, tipo, color, marca, temporada);
-
+        nuevaPrenda.setRutaFoto(rutaFotoSeleccionada); // la foto es opcional
         if (ventanaPrincipal != null) {
             ventanaPrincipal.agregarPrenda(nuevaPrenda);
         }
