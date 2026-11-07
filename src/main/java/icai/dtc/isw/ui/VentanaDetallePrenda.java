@@ -1,12 +1,34 @@
 package icai.dtc.isw.ui;
-import icai.dtc.isw.Prenda;
-
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+
+import icai.dtc.isw.GestorCategoriasPers;
+import icai.dtc.isw.Prenda;
 
 
 // Se crea una ventana emergente (JDialog) independiente para mostrar la prenda en detalle y evitar conflictos en Git con JVentana.java.
@@ -14,10 +36,18 @@ public class VentanaDetallePrenda extends JDialog {
 
     private Prenda prenda;
     private JButton btnFavorito;
+    // Laura -> añado botones de asignar categorias personalizadas a la prenda y quitarlo, esta logica no la habia hecho nadie
+    private JButton btnCategorias; // boton para asignar o quitar categorias personalizadas a la prenda
+    private JPopupMenu menuCategorias = new JPopupMenu(); // submenu con las categorias disponibles, se abre al pulsar el boton
+    private GestorCategoriasPers gestorPers; // gestor de categorias (compartido) es el mismo que usa el panel de filtros
+    private Runnable alCambiarCategorias; // un aviso a la ventana principal que la avisara para repintar filtros y prendas cuando algo cambie aqui
+
 
     // El constructor recibe directamente un objeto Prenda para extraer y pintar toda su información actual en pantalla.
-    public VentanaDetallePrenda(Prenda p) {
+    public VentanaDetallePrenda(Prenda p, GestorCategoriasPers gestorPers, Runnable alCambiarCategorias) {
         this.prenda = p;
+        this.gestorPers = gestorPers;
+        this.alCambiarCategorias = alCambiarCategorias;
 
         // Configuración básica de la ventana con el nombre unificado dressB
         setTitle("dressB - Detalle de Prenda");
@@ -39,22 +69,30 @@ public class VentanaDetallePrenda extends JDialog {
         actualizarAspectoCorazon();
 
         // Al pulsar el corazón, se cambia el estado booleano esFavorito y se añade o quita de la categoría FAVORITOS.
+        // Laura: esta logica la hace el gestor (marcarFavorito), no el boton (UI) para poder probarla y testearla sin depender de la UI
         btnFavorito.addActionListener(e -> {
             boolean nuevoEstado = !prenda.isEsFavorito();
-            prenda.setEsFavorito(nuevoEstado);
-
-            if (prenda.getCategoriasPersonalizadas() != null) {
-                if (nuevoEstado && !prenda.getCategoriasPersonalizadas().contains("FAVORITOS")) {
-                    prenda.getCategoriasPersonalizadas().add("FAVORITOS");
-                    mostrarMensajeTemporal("¡Añadido a favoritos!"); // Lanza el mensaje aquí
-                } else if (!nuevoEstado) {
-                    prenda.getCategoriasPersonalizadas().remove("FAVORITOS");
-                    mostrarMensajeTemporal("Eliminado de favoritos"); // avisar al quitarlo de favoritos
-                }
+            gestorPers.marcarFavorito(prenda, nuevoEstado); // en vez de cambiar con un set, llamo al gestor que hace esa logica
+            if (nuevoEstado) {
+                mostrarMensajeTemporal("¡Añadido a favoritos!"); // Lanza el mensaje aquí
+            } else {
+                mostrarMensajeTemporal("Eliminado de favoritos"); // avisar al quitarlo de favoritos
             }
             actualizarAspectoCorazon();
+            alCambiarCategorias.run(); // aviso al filtro tanto al marcar como al desmarcar
         });
 
+        // boton de categorias personalizadas, permite abrir un submenu para asignar/quitar las de esta prenda y para crear nuevas
+        btnCategorias = new JButton("Categorías");
+        btnCategorias.setFont(new Font("SansSerif", Font.BOLD, 13));
+        btnCategorias.setFocusPainted(false);
+        btnCategorias.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCategorias.addActionListener(e -> {
+            rellenarMenuCategorias(); // lo relleno justo al abrir para que salgan las categorias y cambios de ahora
+            menuCategorias.show(btnCategorias, 0, btnCategorias.getHeight());
+        });
+
+        panelSuperior.add(btnCategorias);
         panelSuperior.add(btnFavorito);
         add(panelSuperior, BorderLayout.NORTH);
 
@@ -132,6 +170,7 @@ public class VentanaDetallePrenda extends JDialog {
                 g2.dispose();
             }
         };
+    
         panelRedondeado.setOpaque(false);
         panelRedondeado.setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));
 
@@ -153,6 +192,61 @@ public class VentanaDetallePrenda extends JDialog {
         timer.start();
     }
 
+    // rellena el menu con una opcion por cada categoria del gestor que comparten, las que ya tiene la prenda salen marcadas
+    private void rellenarMenuCategorias() {
+        menuCategorias.removeAll();
+        List<String> asignadas = prenda.getCategoriasPersonalizadas(); // puede ser null si la prenda aun no tiene lista
+        for (String nombre : gestorPers.getCategorias()) {
+            if ("FAVORITOS".equals(nombre)) {
+                continue; // FAVORITOS se gestiona solo con el corazon, no desde este menu, para que no se desincronicen
+            }
+            boolean asignada = asignadas != null && asignadas.contains(nombre);
+            String textoOpcion;
+            if (asignada) {
+                textoOpcion = "✓ " + nombre; // tick delante si la prenda tiene esa categoria asignada
+            } else {
+                textoOpcion = nombre;
+            }
+            JMenuItem opcion = new JMenuItem(textoOpcion);
+
+            opcion.addActionListener(e -> alternarCategoria(nombre));
+            menuCategorias.add(opcion);
+        }
+        menuCategorias.addSeparator();
+        JMenuItem nueva = new JMenuItem("Nueva categoría..."); // crea el nombre en el gestor para que luego se pueda asignar
+        nueva.addActionListener(e -> crearCategoria()); // abre un dialogo para pedir el nombre y lo crea en el gestor, si ya existe, aviso de duplicado
+        menuCategorias.add(nueva);
+    }
+
+    // asigna la categoria a la prenda si no la tenia, o se la quita si ya la tenia (alterna) , y aviso para refrescar; la operacion sobre la lista la hace el gestor, no la ventana
+    private void alternarCategoria(String nombre) {
+        List<String> asignadas = prenda.getCategoriasPersonalizadas();
+        if (asignadas != null && asignadas.contains(nombre)) {
+            gestorPers.quitarCategoria(prenda, nombre);
+        } else {
+            gestorPers.asignarCategoria(prenda, nombre);
+        }
+        alCambiarCategorias.run(); // aviso a la ventana principal para que refresque el panel de filtros y las prendas
+    }
+
+    // pide el nombre y lo crea en el gestor, si esta repetido, el aviso de repeticion lo muestra la ventana (no el gestor donde estaba antes)
+    private void crearCategoria() {
+        String nombre = JOptionPane.showInputDialog(this, "Nombre de la nueva categoría:");
+        if (nombre == null) {
+            return; // cancela
+        }
+        if (gestorPers.anadirCategoria(nombre)) {
+            alCambiarCategorias.run(); // para que aparezca en los filtros aunque aun no tenga prendas
+        } else if (!nombre.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                "La categoría '" + nombre.trim() + "' ya existe.",
+                "Advertencia de Duplicado",
+                JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+
+
     // Metodo main independiente para probar la ventana pasándole una Prenda ficticia sin depender de la base de datos ni del resto del equipo.
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -167,7 +261,12 @@ public class VentanaDetallePrenda extends JDialog {
             prendaFicticia.setEsFavorito(false);
             prendaFicticia.setCategoriasPersonalizadas(new ArrayList<>(List.of("Otoño")));
 
-            VentanaDetallePrenda ventana = new VentanaDetallePrenda(prendaFicticia);
+            GestorCategoriasPers gestorDemo = new GestorCategoriasPers(); // gestor solo para esta prueba de la ventana
+            gestorDemo.anadirCategoria("Otoño"); // la prenda ficticia ya tiene esta categoria
+
+            VentanaDetallePrenda ventana = new VentanaDetallePrenda(prendaFicticia, gestorDemo, () -> {
+                // aqui no hay ventana principal que refrescar
+            });
             ventana.setVisible(true);
         });
     }
