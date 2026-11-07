@@ -1,17 +1,21 @@
 package icai.dtc.isw.ui;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import java.awt.Color;
 
 import icai.dtc.isw.GestorCategorias;
+import icai.dtc.isw.GestorCategoriasPers;
 import icai.dtc.isw.Prenda;
 
 
@@ -31,16 +35,19 @@ public class PanelFiltroCategorias extends JPanel {
 
     private final GestorCategorias gestorCategorias = new GestorCategorias(); // llamo al gestor de categorias para poder categorizar y filtrar las prendas
     private final JButton botonCategorias = new JButton(); // boton que abre el menu de categorias para filtrar
+    private final GestorCategoriasPers gestorPers; // gestor COMPARTIDO de categorias personalizadas: de aqui salen los nombres para el filtro
     private final JPopupMenu menuCategorias = new JPopupMenu(); // menu con las categorias que se pueden elegir para filtrar, JPopupMenu es un menu que se abre al pulsar un boton, no es un menu de barra superior
     private final EscuchadorFiltro listener; // metodo de la ventana al que avisar cuando cambie el filtro seleccionado
     private List<Prenda> prendas; // prendas sobre las que se filtra (se deben actualizar cuando cambia el armario)
-    private String categoriaActual = "Todas"; // categoria elegida por defecto, para enseñarla en el boton y no perderla al actualizar (muestra todas las prendas del armario, sin filtro)
+    // filtros activos: criterio de filtrado el valor elegido de filtro si esta vacio mostrar todas 
+    private final Map<String, String> filtrosActivos = new HashMap<>();
 
 
     // recibe todas las prendas y el escuchador (listener) (metodo de antes al que llamar al cambiar el filtro)
-    public PanelFiltroCategorias(List<Prenda> prendas, EscuchadorFiltro listener) {
+    public PanelFiltroCategorias(List<Prenda> prendas, EscuchadorFiltro listener,  GestorCategoriasPers gestorPers) {
         this.prendas = prendas; // prendas para poder filtrarlas cuando cambia el filtro
         this.listener = listener; // escuchador para avisar a ventana cuando cambia el filtro
+        this.gestorPers = gestorPers; // gestor de categorias personalizadas compartido con la ventana para que se actualice al cambiar el nombre de una categoria
 
         // ajusto la estetica del boton al estilo de  dressB, igual que los demas botones de la ventana
         botonCategorias.setBackground(BURDEOS); // fondo burdeos como los demas botones
@@ -56,46 +63,113 @@ public class PanelFiltroCategorias extends JPanel {
 
         setBackground(CREMA);
         rellenarMenu(); // rellena el menu con las categorias disponibles, definido debajo
-        botonCategorias.setText("Categoría: " + categoriaActual); // texto del boton con el filtro activo
+        actualizarTextoBoton(); // texto del boton con los filtros activos
         add(botonCategorias);
     }
 
 
-    // Rellena el menu con "Todas" (no filtra) + los tipos que existen en las prendas actuales
+    // Rellena el menu con un submenu por atributo (tipo, marca...), otro con las categorias personalizadas y, si hay filtros activos, opciones para quitarlos. Los valores salen de TODAS las prendas, no solo de las filtradas.
     private void rellenarMenu() {
         menuCategorias.removeAll(); // vacio el menu para rellenarlo con las categorias de ahora, si se han añadido prendas nuevas o quitado, se actualiza
-        anadirOpcion("Todas"); // opcion para quitar el filtro y mostrar todas las prendas
-        gestorCategorias.categorizarPorTipo(prendas).keySet().forEach(this::anadirOpcion); // una opcion por categoria existente
+
+        for (String atributo : gestorCategorias.nombresAtributos()) { // un submenu por atributo registrado en el gestor
+            JMenu submenu = new JMenu(atributo); // JMenu -> fila de menu que se despliega a un lado
+            for (String valor : gestorCategorias.valoresDeAtributo(prendas, atributo)) {
+                JMenuItem opcion = new JMenuItem(valor);
+                opcion.addActionListener(e -> aplicarFiltro(atributo, valor)); // al pulsar, guarda el valor para ese criterio
+                submenu.add(opcion);
+            }
+            anadirOpcionQuitar(submenu, atributo); // si este criterio tiene filtro activo, opcion de quitarlo
+            menuCategorias.add(submenu);
     }
 
-    // Añade una opcion al menu desplegable, al pulsarla y esogerla se aplicara el filtro
-    private void anadirOpcion(String categoria) { 
-        JMenuItem opcion = new JMenuItem(categoria); // fila clickable del menu
-        opcion.addActionListener(e -> aplicarFiltro(categoria)); // al pulsar la opcion, se aplica el filtro de esa categoria
-        menuCategorias.add(opcion); // añado la opcion al menu visiblemente
-    }
-
-    // aplica el filtro elegido y llama a la ventana para que muestre las prendas filtradas
-    private void aplicarFiltro(String categoriaElegida) {
-        categoriaActual = categoriaElegida; 
-        botonCategorias.setText("Categoría: " + categoriaElegida); // se enseña el filtro activo dentro del boton
-        List<Prenda> prendasFiltradas;
-        if ("Todas".equals(categoriaElegida)) {
-            prendasFiltradas = prendas; // mostrar todas las prendas si el filtro es todas (basicamente no filtrar)
-        } else { // en cualquier otro caso habra un filtro normal, llamo al gestor y filtro
-            prendasFiltradas = gestorCategorias.prendasPorTipo(prendas, categoriaElegida);
+        // submenu de categorias personalizadas, los nombres salen del gestor, aunque no esten en prendas todavia, aunque no funcionara el usuario puede filtrar por algo que una prenda aun no tiene
+        JMenu submenuPers = new JMenu("Categorías personalizadas"); // la clave del mapa de filtros es "categoriaPersonalizada"
+        for (String nombre : gestorPers.getCategorias()) {
+            JMenuItem opcion = new JMenuItem(nombre);
+            opcion.addActionListener(e -> aplicarFiltro("categoriaPersonalizada", nombre));
+            submenuPers.add(opcion);
         }
+        anadirOpcionQuitar(submenuPers, "categoriaPersonalizada");
+        menuCategorias.add(submenuPers);
+
+        if (!filtrosActivos.isEmpty()) { // opcion para limpiar todos los filtros de golpe
+            menuCategorias.addSeparator();
+            JMenuItem quitarTodos = new JMenuItem("Quitar todos los filtros");
+            quitarTodos.addActionListener(e -> {
+                filtrosActivos.clear();
+                reaplicar();
+            });
+            menuCategorias.add(quitarTodos);
+        }
+    }
+
+    // añade al submenu la opcion de quitar el filtro de ese criterio, unicamente si esta activo
+    private void anadirOpcionQuitar(JMenu submenu, String criterio) {
+        if (filtrosActivos.containsKey(criterio)) {
+            JMenuItem quitar = new JMenuItem("Quitar filtro");
+            quitar.addActionListener(e -> quitarFiltro(criterio));
+            submenu.addSeparator();
+            submenu.add(quitar);
+        }
+    }
+
+    // quita el filtro que quiero y reaplico filtrado a los que queden
+    private void quitarFiltro(String filtroABorrar) {
+        filtrosActivos.remove(filtroABorrar);
+        reaplicar();
+    }
+
+    // guarda el valor elegido para ese criterio de filtrado (tipoFiltrado, por ej "marca") (si ya habia uno, lo sustituye) y reaplica todos los filtros
+   private void aplicarFiltro(String tipoFiltrado, String valor) {
+        filtrosActivos.put(tipoFiltrado, valor);
+        reaplicar();
+    }
+    
+
+    // aplicar el filtro elegido y llamar a la ventana para que muestre unicamente las prendas filtradas, cada vez que hay un cambio en los filtros hay que llamarlo
+    private void reaplicar() {
+        List<Prenda> prendasFiltradas = gestorCategorias.filtrarCombinado(prendas, filtrosActivos); // si el mapa esta vacio te va a devolver todas las prendas
+        actualizarTextoBoton();
+        rellenarMenu(); // repinto el menu para que aparezcan las opciones de quitar segun lo que este activo
         listener.mostrarPrendas(prendasFiltradas); // la ventana solo pintara las prendas filtradas o todas en su caso
     }
 
     // se llama a este metodo cuando cambien las prendas del armario (añadir, eliminar...) para que el filtro vea las categorias nuevas
     public void actualizarPrendas(List<Prenda> nuevasPrendas) {
         this.prendas = nuevasPrendas;
-        if (!"Todas".equals(categoriaActual) && !gestorCategorias.categorizarPorTipo(prendas).containsKey(categoriaActual)) {
-            categoriaActual = "Todas"; // si la categoria del filtro ya no existe, quito el filtro y muestro todas las prendas
-        }
-        rellenarMenu();
-        aplicarFiltro(categoriaActual); // repinto las prendas con el filtro activo que habia antes de actualizar
+        reaplicar(); // mantengo los filtros activos y los aplico a las prendas actualizadas
     }
+
+    // se le llama al cambiar un nombre de categoria personalizada, se añade o se borra, para que se reactualice el menu de filtrado
+    public void actualizarCategorias() {
+        reaplicar();
+    }
+
+    // texto del boton corto para que quepa bien en la ventana, completo se ve al pasar el raton (tooltip)
+    private void actualizarTextoBoton() {
+        if (filtrosActivos.isEmpty()) {
+            botonCategorias.setText("Categoría: Todas");
+            botonCategorias.setToolTipText(null); // si no hay filtros estoy mostrando todo y no hay nada extra q mostrar
+        } else {
+            botonCategorias.setText("Filtros: " + filtrosActivos.size());
+            String textoFiltrosActivos = ""; // texto con todos los filtros elegidos
+            for (Map.Entry<String, String> filtro : filtrosActivos.entrySet()) {
+                if (!textoFiltrosActivos.equals("")) {
+                    textoFiltrosActivos += " + "; // voy a ir añadiendo el tipo de filtro y por lo que estoy filtrando y con el raton el user pueda verlo
+                }
+                String nombreFiltro; // por lo que estoy filtrando (ej: "tipo")
+                // la clave interna "categoriaPersonalizada" se muestra como "categoria" sin mas
+                if (filtro.getKey().equals("categoriaPersonalizada")) {
+                    nombreFiltro = "categoria";
+                } else {
+                    nombreFiltro = filtro.getKey();
+                }
+                textoFiltrosActivos += nombreFiltro + " = " + filtro.getValue();
+            }
+            botonCategorias.setToolTipText(textoFiltrosActivos); // va a ir añadiendose texto de esta manera: "tipo = Camisetas + marca = Zara"
+        }
+    }
+
 
 }

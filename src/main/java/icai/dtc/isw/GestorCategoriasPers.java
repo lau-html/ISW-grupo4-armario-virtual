@@ -1,6 +1,5 @@
-package icai.dtc.isw; // Ajusta el paquete según tu proyecto
+package icai.dtc.isw;
 
-import javax.swing.JOptionPane;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +13,13 @@ public class GestorCategoriasPers {
         categorias.add(CATEGORIA_POR_DEFECTO);
     }
 
-    public void anadirCategoria(String nuevaCategoria) {
+
+    // LAURA: saco los JOptionPane del gestor; los avisos los muevo a la ui
+    // devuelve true si la categoria se ha añadido y false si estaba vacia o repetida (lo cambio a public boolean);
+    public boolean anadirCategoria(String nuevaCategoria) {
         if (nuevaCategoria == null || nuevaCategoria.trim().isEmpty()) {
-            return;
+            return false; // antes aqui lanzaba joptionpane, si no hay un nombre valido, no creo la categoria
+
         }
         
         String categoriaLimpia = nuevaCategoria.trim();
@@ -24,30 +27,50 @@ public class GestorCategoriasPers {
         // 2. Validar duplicados ignorando mayúsculas/minúsculas
         for (String cat : categorias) {
             if (cat.trim().equalsIgnoreCase(categoriaLimpia)) {
-                // Lanza un JOptionPane de advertencia si ya existe
-                JOptionPane.showMessageDialog(null, 
-                    "La categoría '" + categoriaLimpia + "' ya existe.", 
-                    "Advertencia de Duplicado", 
-                    JOptionPane.WARNING_MESSAGE);
-                return;
+                return false; // antes aqui lanzaba joptionpane
             }
         }
         categorias.add(categoriaLimpia);
+        return true;
     }
 
-    public void borrarCategoria(String categoriaABorrar) {
+    // LAURA: lo mismo, devuelve true si la categoria se ha borrado; false si era FAVORITOS o no estaba
+    public boolean borrarCategoria(String categoriaABorrar) {
         // Bloquea que "FAVORITOS" se pueda borrar
         if (categoriaABorrar != null && categoriaABorrar.trim().equalsIgnoreCase(CATEGORIA_POR_DEFECTO)) {
-            JOptionPane.showMessageDialog(null, 
-                "La categoría FAVORITOS no se puede borrar.", 
-                "Acción denegada", 
-                JOptionPane.ERROR_MESSAGE);
-            return;
+            return false; // antes aqui lanzaba joptionpane
         }
-        categorias.remove(categoriaABorrar);
+        return categorias.remove(categoriaABorrar); // devuelve true si se ha borrado, false si no estaba
     }
 
     public List<String> getCategorias() {
         return categorias;
+    }
+
+    // asigno una categoria a una prenda, a su lista de categorias personalizadas; crea la lista si la prenda aun no tenia
+    public void asignarCategoria(Prenda prenda, String nombre) {
+        if (prenda.getCategoriasPersonalizadas() == null) {
+            prenda.setCategoriasPersonalizadas(new ArrayList<>());
+        }
+        if (!prenda.getCategoriasPersonalizadas().contains(nombre)) {
+            prenda.getCategoriasPersonalizadas().add(nombre);
+        }
+    }
+
+    // quita una categoria de una prenda; si no la tenia (o no tenia lista directamente) no hace nada
+    public void quitarCategoria(Prenda prenda, String nombre) {
+        if (prenda.getCategoriasPersonalizadas() != null) {
+            prenda.getCategoriasPersonalizadas().remove(nombre);
+        }
+    }
+
+    // marcar o desmarcar favorito: sincronizo la categoria de FAVORITOS en la lista de categoriasPersonalizadas 
+    public void marcarFavorito(Prenda prenda, boolean favorito) {
+        prenda.setEsFavorito(favorito);
+        if (favorito) {
+            asignarCategoria(prenda, CATEGORIA_POR_DEFECTO);
+        } else {
+            quitarCategoria(prenda, CATEGORIA_POR_DEFECTO);
+        }
     }
 }

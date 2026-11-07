@@ -14,6 +14,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -25,15 +26,14 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.JComboBox;
 
+import icai.dtc.isw.GestorCategoriasPers;
+import icai.dtc.isw.GestorOutfits;
 import icai.dtc.isw.GestorPrendas;
+import icai.dtc.isw.Outfit;
 import icai.dtc.isw.Prenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
-import icai.dtc.isw.ui.VentanaDetallePrenda;
-import icai.dtc.isw.Outfit;
-import icai.dtc.isw.GestorOutfits;
 
 // VENTANA PRINCIPAL DE dressB: se abre después de iniciar sesión.
 public class JVentana extends JFrame {
@@ -51,6 +51,7 @@ public class JVentana extends JFrame {
     private List<Prenda> todasLasPrendas = new ArrayList<>(); // todas las prendas usuario
     private final GestorPrendas gestorPrendas = new GestorPrendas(); // lógica de editar y eliminar
     private PanelFiltroCategorias panelFiltro; // filtro de categorias, hay que actualizarlo cuando cambian las prendas para que vea las nuevas categorias
+    private final GestorCategoriasPers gestorCategoriasPers = new GestorCategoriasPers(); // mismo gestor de categorias para el filtro y el detalle
 
     // Desplegables de la pestaña Outfits
     private JComboBox<Prenda> cbArriba = new JComboBox<>();
@@ -140,7 +141,7 @@ public class JVentana extends JFrame {
         barra.add(btnEliminar);
 
         // LAU: filtro por categoria, al elegir una, usa mostrarPrendas con las filtradas
-        panelFiltro = new PanelFiltroCategorias(todasLasPrendas, this::mostrarPrendas);
+        panelFiltro = new PanelFiltroCategorias(todasLasPrendas, this::mostrarPrendas, gestorCategoriasPers);
         barra.add(panelFiltro);
 
         // Botón del listado de prendas (Ver listado)
@@ -248,6 +249,12 @@ public class JVentana extends JFrame {
         }
     }
 
+    // se llama desde el detalle cuando cambian las categorias de una prenda o se crea una categoria nueva, le manndo refrescar los filtrados y prendas visibles
+    private void refrescarVista() {
+        panelFiltro.actualizarPrendas(todasLasPrendas); // reaplico filtros y actualizo el menu con los datos de ahora
+    }
+
+
     // Muestra en "Mi armario" la lista de prendas que se le pase.
     public void mostrarPrendas(List<Prenda> prendas) {
         prendasActuales = new ArrayList<>(prendas); // guardamos la lista para poder editar y eliminar
@@ -255,7 +262,13 @@ public class JVentana extends JFrame {
         panelPrendas.removeAll();
 
         if (prendas.isEmpty()) {
-            JLabel lblVacio = new JLabel("Todavía no tienes prendas en tu armario. ¡Añade la primera!", SwingConstants.CENTER);
+            String textoVacio;
+            if (todasLasPrendas.isEmpty()) {
+                textoVacio = "Todavía no tienes prendas en tu armario. ¡Añade la primera!";
+            } else {
+                textoVacio = "Ninguna prenda cumple los filtros activos. Prueba a quitar alguno.";
+            }
+            JLabel lblVacio = new JLabel(textoVacio, SwingConstants.CENTER);
             lblVacio.setFont(new Font("SansSerif", Font.ITALIC, 14));
             lblVacio.setForeground(GRIS_TEXTO);
             panelPrendas.add(lblVacio, BorderLayout.CENTER);
@@ -277,7 +290,7 @@ public class JVentana extends JFrame {
                     if (e.getClickCount() == 2) {
                         Prenda prendaSeleccionada = listaPrendas.getSelectedValue();
                         if (prendaSeleccionada != null) {
-                            new VentanaDetallePrenda(prendaSeleccionada).setVisible(true);
+                            new VentanaDetallePrenda(prendaSeleccionada, gestorCategoriasPers, JVentana.this::refrescarVista).setVisible(true); // paso el gestor compartido y el aviso para refrescar
                         }
                     }
                 }

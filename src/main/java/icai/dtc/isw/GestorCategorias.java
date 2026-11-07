@@ -1,15 +1,16 @@
 package icai.dtc.isw;
-
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class GestorCategorias { 
 
     // relacionar cada atributo de las prendas con su getter, para luego poder filtrar sin hacer un metodo o un bucle para cada uno
-    private final Map<String, Function<Prenda, String>> atributosFijos = new HashMap<>();
+    // LinkedHashMap para que el menu del filtro salga en el mismo orden en que se dan de alta 
+    private final Map<String, Function<Prenda, String>> atributosFijos = new LinkedHashMap<>();
 
 
     // IMPORTANTE!! SI AÑADIMOS NUEVOS ATRIBUTOS A LA CLASE PRENDA, HAY QUE AÑADIRLOS A ESTE MAPA A CONTINUACION PARA PODER FILTRAR POR ELLOS
@@ -21,27 +22,7 @@ public class GestorCategorias {
         atributosFijos.put("color", Prenda::getColor);
     }
 
-
-    // Agrupa y categoriza prendas por tipo
-    // Devuelve un mapa: clave = tipo de ropa ("Pantalones"), valor = lista de prendas de ese tipo
-    public Map<String, List<Prenda>> categorizarPorTipo(List<Prenda> prendas) {
-        Map<String, List<Prenda>> categorias = new HashMap<>();
-
-        for (Prenda prenda : prendas) {
-            String tipo = prenda.getTipo();
-            categorias.putIfAbsent(tipo, new ArrayList<>()); // Si la categoría no existe, se crea una nueva lista
-            categorias.get(tipo).add(prenda); // metes la prenda en la lista correspondiente a su tipo
-        }
-
-        return categorias;
-    }
-
-    // Filtra y devuelve SOLO las prendas de un tipo concreto (si esta en "Pantalones" te da la de pantalones)
-    public List<Prenda> prendasPorTipo(List<Prenda> prendas, String tipoFiltrado) {
-        return prendas.stream()
-                .filter(prenda -> prenda.getTipo().equals(tipoFiltrado)) // deja pasar solo las que coinciden con el tipo
-                .toList(); // volvemos a juntarlas en una lista
-    }
+    // quito el metodo de categorizarPorTipo y prendasPorTipo, ya que esa logica la gestiona filtrarPor de la misma manera y no es necesario iteraciones de mas
 
     /* ESTA ES LA VERSIÓN ESCALABLE: puede filtrar por CUALQUIER atributo de la prenda,
         Explicacion del filtrado:
@@ -59,8 +40,8 @@ public class GestorCategorias {
         El metodo se llama al usar el apply(p), que ejecuta el getter sobre la prenda p */
 
     public List<Prenda> filtrarPor(List<Prenda> prendas, Function<Prenda, String> atributo, String valor) {
-        return prendas.stream()
-                .filter(p -> atributo.apply(p).equals(valor)) // atributo.apply(p) = llamar al getter sobre p
+        return prendas.stream() 
+                .filter(p -> Objects.equals(atributo.apply(p), valor)) // atributo.apply(p) = llamar al getter sobre p;  // Objects.equals para que una prenda con ese atributo a null no rompa el filtro
                 .toList();
     }
 // FILTRADO POR VARIOS ATRIBUTOS SIMULTANEOS - permitir seleccionar varios filtros a la vez:
@@ -87,6 +68,28 @@ public class GestorCategorias {
 
         }
         return resultado; // devuelvo la lista de prendas filtradas por todos los filtros activos
+    }
+
+    // guardo los nombres de los atributos que se pueden filtrar en el orden en que se dieron de alta en el constructor (para el menu del panel)
+    public java.util.Set<String> nombresAtributos() {
+        return atributosFijos.keySet(); // los atributos que estan fijos por un lado
+    }
+
+    // valores distintos que tiene un atributo en las prendas, sin repetir (para las opciones del menu del panel)
+    // si yo tengo un atributo en el panel me saldran todas las opciones posibles por las que filtrar en cuanto a ese atributo
+    public List<String> valoresDeAtributo(List<Prenda> prendas, String nombreAtributo) {
+        Function<Prenda, String> getter = atributosFijos.get(nombreAtributo);
+        if (getter == null) {
+            return new ArrayList<>(); // atributo que no conozco
+        }
+        List<String> valores = new ArrayList<>();
+        for (Prenda p : prendas) {
+            String valor = getter.apply(p);
+            if (valor != null && !valores.contains(valor)) {
+                valores.add(valor);
+            }
+        }
+        return valores;
     }
 }
 
