@@ -228,6 +228,14 @@ public class JVentana extends JFrame {
     private void recargarPrendasDesdeBD() {
         todasLasPrendas.clear();
         todasLasPrendas.addAll(gestorPrendas.cargarPrendasUsuario(true));
+        // repuebla el gestor con las categorias que vienen de la BD para que salgan en el filtro y el menu del detalle
+        for (Prenda p : todasLasPrendas) {
+            if (p.getCategoriasPersonalizadas() != null) {
+                for (String nombre : p.getCategoriasPersonalizadas()) {
+                    gestorCategoriasPers.anadirCategoria(nombre); // ya ignora duplicados y vacios
+                }
+            }
+        }
         aplicarOrden();
     }
 

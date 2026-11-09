@@ -28,7 +28,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import icai.dtc.isw.GestorCategoriasPers;
+import icai.dtc.isw.GestorPrendas;
 import icai.dtc.isw.Prenda;
+
 
 
 // Se crea una ventana emergente (JDialog) independiente para mostrar la prenda en detalle y evitar conflictos en Git con JVentana.java.
@@ -40,6 +42,7 @@ public class VentanaDetallePrenda extends JDialog {
     private JButton btnCategorias; // boton para asignar o quitar categorias personalizadas a la prenda
     private JPopupMenu menuCategorias = new JPopupMenu(); // submenu con las categorias disponibles, se abre al pulsar el boton
     private GestorCategoriasPers gestorPers; // gestor de categorias (compartido) es el mismo que usa el panel de filtros
+    private final GestorPrendas gestorPrendas = new GestorPrendas(); // para guardar los cambios en la BD
     private Runnable alCambiarCategorias; // un aviso a la ventana principal que la avisara para repintar filtros y prendas cuando algo cambie aqui
 
 
@@ -79,6 +82,7 @@ public class VentanaDetallePrenda extends JDialog {
                 mostrarMensajeTemporal("Eliminado de favoritos"); // avisar al quitarlo de favoritos
             }
             actualizarAspectoCorazon();
+            gestorPrendas.guardarCategoriasYFavorito(prenda); // lo guardo tambien en la BD
             alCambiarCategorias.run(); // aviso al filtro tanto al marcar como al desmarcar
         });
 
@@ -226,6 +230,7 @@ public class VentanaDetallePrenda extends JDialog {
         } else {
             gestorPers.asignarCategoria(prenda, nombre);
         }
+        gestorPrendas.guardarCategoriasYFavorito(prenda); // lo guardo tambien en la BD
         alCambiarCategorias.run(); // aviso a la ventana principal para que refresque el panel de filtros y las prendas
     }
 

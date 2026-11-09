@@ -1,6 +1,5 @@
 package icai.dtc.isw.dao;
 
-import icai.dtc.isw.Prenda;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+
+import icai.dtc.isw.Prenda;
 
 public class PrendaDAO {
 
@@ -48,8 +49,9 @@ public class PrendaDAO {
             return false;
         }
 
-        String sql = "INSERT INTO prenda (nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO prenda (nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, categorias, favorito) "
+        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         Connection conn = ConnectionDAO.getInstance().getConnection();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -61,6 +63,9 @@ public class PrendaDAO {
             pstmt.setString(6, prenda.getMarca());
             pstmt.setString(7, prenda.getTemporada());
             pstmt.setString(8, email);
+            pstmt.setString(9, categoriasComoTexto(prenda.getCategoriasPersonalizadas())); // las categorias juntas 
+            pstmt.setBoolean(10, prenda.isEsFavorito());
+
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -81,7 +86,7 @@ public class PrendaDAO {
         // El orden solo puede valer ASC o DESC, así que concatenarlo es seguro.
         // El email SIEMPRE va con "?" para evitar inyección SQL.
         String orden = masRecientesPrimero ? "DESC" : "ASC";
-        String sql = "SELECT id, nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, fecha_creacion "
+        String sql = "SELECT id, nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, fecha_creacion, categorias, favorito "
                 + "FROM prenda WHERE usuario_email = ? "
                 + "ORDER BY fecha_creacion " + orden + ", id " + orden;
         Connection conn = ConnectionDAO.getInstance().getConnection();
@@ -104,6 +109,8 @@ public class PrendaDAO {
                     if (ts != null) {
                         p.setFechaCreacion(ts.toLocalDateTime());
                     }
+                    p.setCategoriasPersonalizadas(textoACategorias(rs.getString("categorias"))); // las recupero de la BD
+                    p.setEsFavorito(rs.getBoolean("favorito"));
                     prendas.add(p);
                 }
             }
@@ -150,6 +157,40 @@ public class PrendaDAO {
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error al eliminar la prenda " + id);
+            e.printStackTrace();
+            return false;
+        }
+    }
+    // junta las categorias para guardarlas en la columna de la base de datos
+    private String categoriasComoTexto(List<String> categorias) {
+        if (categorias == null) {
+            return "";
+        }
+        return String.join(";", categorias);
+    }
+
+    private List<String> textoACategorias(String texto) {
+        List<String> categorias = new ArrayList<>();
+        if (texto != null && !texto.isBlank()) {
+            for (String categoria : texto.split(";")) {
+                categorias.add(categoria);
+            }
+        }
+        return categorias;
+    }
+
+    // guarda en la BD las categorias y el favorito de una prenda solo si es de ese usuario -> antes no se guardaban en la BD
+    public boolean actualizarCategoriasYFavorito(int id, List<String> categorias, boolean favorito, String usuarioEmail) {
+        String sql = "UPDATE prenda SET categorias = ?, favorito = ? WHERE id = ? AND usuario_email = ?";
+        Connection conn = ConnectionDAO.getInstance().getConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, categoriasComoTexto(categorias));
+            pstmt.setBoolean(2, favorito);
+            pstmt.setInt(3, id);
+            pstmt.setString(4, usuarioEmail);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al guardar las categorias de la prenda " + id);
             e.printStackTrace();
             return false;
         }
