@@ -53,6 +53,9 @@ public class JVentana extends JFrame {
     private PanelFiltroCategorias panelFiltro; // filtro de categorias, hay que actualizarlo cuando cambian las prendas para que vea las nuevas categorias
     private final GestorCategoriasPers gestorCategoriasPers = new GestorCategoriasPers(); // mismo gestor de categorias para el filtro y el detalle
 
+    // SPRINT 2 (bonus): desplegable para ordenar por antigüedad
+    private final JComboBox<String> cbOrden = new JComboBox<>(new String[]{"Más recientes", "Más antiguas"});
+
     // Desplegables de la pestaña Outfits
     private JComboBox<Prenda> cbArriba = new JComboBox<>();
     private JComboBox<Prenda> cbAbajo = new JComboBox<>();
@@ -116,6 +119,10 @@ public class JVentana extends JFrame {
 
     // PESTAÑA "MI ARMARIO"
     private JPanel crearPanelArmario() {
+        // SPRINT 2: cargar de la BD las prendas del usuario que ha iniciado sesión
+        // (antes de crear el filtro, para que el filtro ya vea sus categorías)
+        recargarPrendasDesdeBD();
+
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(CREMA);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -148,6 +155,13 @@ public class JVentana extends JFrame {
         JButton btnListado = crearBoton("Ver listado");
         btnListado.addActionListener(e -> VisualizarNumPrendas.mostrarVentana((List) prendasActuales));
         barra.add(btnListado);
+
+        // SPRINT 2 (bonus): ordenar por "más recientes" / "más antiguas" (respeta los filtros activos)
+        cbOrden.addActionListener(e -> {
+            aplicarOrden();
+            panelFiltro.actualizarPrendas(todasLasPrendas);
+        });
+        barra.add(cbOrden);
         panel.add(barra, BorderLayout.NORTH);
 
         // Zona donde se muestran las prendas
@@ -155,10 +169,27 @@ public class JVentana extends JFrame {
         panelPrendas.setBackground(CREMA);
         panel.add(panelPrendas, BorderLayout.CENTER);
 
-        // De momento el armario está vacío.
-        mostrarPrendas(new ArrayList<>());
+        // SPRINT 2: se muestran las prendas guardadas del usuario (si no tiene, sale el mensaje de armario vacío)
+        mostrarPrendas(todasLasPrendas);
 
         return panel;
+    }
+
+    // SPRINT 2: vuelve a leer de la BD las prendas del usuario activo.
+    // Se rellena la MISMA lista (clear + addAll) porque otras partes guardan una referencia a ella.
+    private void recargarPrendasDesdeBD() {
+        todasLasPrendas.clear();
+        todasLasPrendas.addAll(gestorPrendas.cargarPrendasUsuario(true));
+        aplicarOrden();
+    }
+
+    // SPRINT 2 (bonus): ordena todasLasPrendas según lo elegido en el desplegable
+    private void aplicarOrden() {
+        if ("Más antiguas".equals(cbOrden.getSelectedItem())) {
+            gestorPrendas.ordenarMasAntiguas(todasLasPrendas);
+        } else {
+            gestorPrendas.ordenarMasRecientes(todasLasPrendas);
+        }
     }
 
     // PESTAÑA "CREADOR DE OUTFITS"
@@ -301,12 +332,27 @@ public class JVentana extends JFrame {
         panelPrendas.revalidate();
         panelPrendas.repaint();
     }
-    
+
     // Añade una nueva prenda al armario y refresca la vista en texto
+    // SPRINT 2: la prenda se guarda en la BD a nombre del usuario activo y se recarga la lista
+    // (así cada prenda tiene su id y fecha reales de la BD).
     public void agregarPrenda(Prenda nuevaPrenda) {
-        // Asignar un ID incremental si no tiene uno
-        nuevaPrenda.setId(todasLasPrendas.size() + 1);
-        todasLasPrendas.add(nuevaPrenda);
+        String rutaFoto = nuevaPrenda.getRutaFoto(); // la foto aún no se guarda en la BD
+        if (!gestorPrendas.guardarPrenda(nuevaPrenda)) {
+            JOptionPane.showMessageDialog(this,
+                    "No se ha podido guardar la prenda en la base de datos.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        recargarPrendasDesdeBD();
+        // conservo la foto elegida en esta sesión para la prenda recién guardada
+        for (Prenda p : todasLasPrendas) {
+            if (p.getRutaFoto() == null && rutaFoto != null
+                    && p.getNombre().equals(nuevaPrenda.getNombre())) {
+                p.setRutaFoto(rutaFoto);
+                break;
+            }
+        }
         mostrarPrendas(todasLasPrendas);
         actualizarDesplegables(); // Se actualizan los desplegables
         panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la nueva prenda
@@ -333,7 +379,13 @@ public class JVentana extends JFrame {
                 "¿Seguro que quieres eliminar \"" + prenda.getNombre() + "\"?",
                 "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
         if (respuesta == JOptionPane.YES_OPTION) {
-            gestorPrendas.eliminarPrenda(todasLasPrendas, prenda.getId());
+            // SPRINT 2: se borra también de la base de datos
+            if (!gestorPrendas.eliminarPrendaGuardada(todasLasPrendas, prenda.getId())) {
+                JOptionPane.showMessageDialog(this,
+                        "No se ha podido eliminar la prenda de la base de datos.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             mostrarPrendas(todasLasPrendas); // refrescar la lista
             actualizarDesplegables();        // refrescar desplegables
             panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la prenda eliminada
@@ -373,8 +425,15 @@ public class JVentana extends JFrame {
         int respuesta = JOptionPane.showConfirmDialog(this, formulario,
                 "Editar prenda", JOptionPane.OK_CANCEL_OPTION);
         if (respuesta == JOptionPane.OK_OPTION) {
-            gestorPrendas.editarPrenda(todasLasPrendas, prenda.getId(),
-                    txtNombre.getText(), txtTipo.getText(), txtColor.getText());
+            // SPRINT 2: el cambio se guarda también en la base de datos
+            boolean editada = gestorPrendas.editarPrendaGuardada(todasLasPrendas, prenda.getId(),
+                    txtNombre.getText().trim(), txtTipo.getText().trim(), txtColor.getText().trim());
+            if (!editada) {
+                JOptionPane.showMessageDialog(this,
+                        "No se ha podido guardar el cambio en la base de datos.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             prenda.setRutaFoto(rutaFoto[0]);
             mostrarPrendas(todasLasPrendas); // refrescar la lista
             actualizarDesplegables();        // refrescar desplegables
