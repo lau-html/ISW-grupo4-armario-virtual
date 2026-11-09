@@ -49,8 +49,8 @@ public class PrendaDAO {
             return false;
         }
 
-        String sql = "INSERT INTO prenda (nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, categorias, favorito) "
-        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO prenda (nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, categorias, favorito, ruta_foto) "
+        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
 
         Connection conn = ConnectionDAO.getInstance().getConnection();
 
@@ -65,6 +65,7 @@ public class PrendaDAO {
             pstmt.setString(8, email);
             pstmt.setString(9, categoriasComoTexto(prenda.getCategoriasPersonalizadas())); // las categorias juntas 
             pstmt.setBoolean(10, prenda.isEsFavorito());
+            pstmt.setString(11,prenda.getRutaFoto());
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -86,7 +87,7 @@ public class PrendaDAO {
         // El orden solo puede valer ASC o DESC, así que concatenarlo es seguro.
         // El email SIEMPRE va con "?" para evitar inyección SQL.
         String orden = masRecientesPrimero ? "DESC" : "ASC";
-        String sql = "SELECT id, nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, fecha_creacion, categorias, favorito "
+        String sql = "SELECT id, nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, fecha_creacion, categorias, favorito,ruta_foto "
                 + "FROM prenda WHERE usuario_email = ? "
                 + "ORDER BY fecha_creacion " + orden + ", id " + orden;
         Connection conn = ConnectionDAO.getInstance().getConnection();
@@ -111,6 +112,7 @@ public class PrendaDAO {
                     }
                     p.setCategoriasPersonalizadas(textoACategorias(rs.getString("categorias"))); // las recupero de la BD
                     p.setEsFavorito(rs.getBoolean("favorito"));
+                    p.setRutaFoto(rs.getString("ruta_foto"));
                     prendas.add(p);
                 }
             }
@@ -191,6 +193,22 @@ public class PrendaDAO {
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error al guardar las categorias de la prenda " + id);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // guarda en la BD la ruta de la foto de una prenda, solo si es de ese usuario
+    public boolean actualizarFoto(int id, String rutaFoto, String usuarioEmail) {
+        String sql = "UPDATE prenda SET ruta_foto = ? WHERE id = ? AND usuario_email = ?";
+        Connection conn = ConnectionDAO.getInstance().getConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, rutaFoto);
+            pstmt.setInt(2, id);
+            pstmt.setString(3, usuarioEmail);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al guardar la foto de la prenda " + id);
             e.printStackTrace();
             return false;
         }

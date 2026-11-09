@@ -117,4 +117,15 @@ public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS
         String email = SesionUsuario.getUsuarioActual().getEmail();
         return prendaDAO.actualizarCategoriasYFavorito(prenda.getId(), prenda.getCategoriasPersonalizadas(), prenda.isEsFavorito(), email);
     }
+
+    // Guarda en la BD la foto de la prenda y devuelve true si se ha guardado bien
+    public boolean guardarFoto(Prenda prenda) {
+        if (!SesionUsuario.haySesion()) {
+            System.out.println("No hay sesión iniciada: no se puede guardar la foto.");
+            return false;
+        }
+        String email = SesionUsuario.getUsuarioActual().getEmail();
+        return prendaDAO.actualizarFoto(prenda.getId(), prenda.getRutaFoto(), email);
+    }
+
 }
