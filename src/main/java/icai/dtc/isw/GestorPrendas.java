@@ -107,4 +107,14 @@ public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS
                         Comparator.nullsLast(Comparator.<LocalDateTime>reverseOrder()))
                 .thenComparing(Comparator.comparingInt(Prenda::getId).reversed()));
     }
+
+    // Guarda en la BD las categorias y el favorito de la prenda y devuelve true si se ha guardado bien
+    public boolean guardarCategoriasYFavorito(Prenda prenda) {
+        if (!SesionUsuario.haySesion()) {
+            System.out.println("No hay sesión iniciada: no se pueden guardar las categorias.");
+            return false;
+        }
+        String email = SesionUsuario.getUsuarioActual().getEmail();
+        return prendaDAO.actualizarCategoriasYFavorito(prenda.getId(), prenda.getCategoriasPersonalizadas(), prenda.isEsFavorito(), email);
+    }
 }
