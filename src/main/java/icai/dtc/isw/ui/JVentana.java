@@ -415,7 +415,6 @@ public class JVentana extends JFrame {
     // SPRINT 2: la prenda se guarda en la BD a nombre del usuario activo y se recarga la lista
     // (así cada prenda tiene su id y fecha reales de la BD).
     public void agregarPrenda(Prenda nuevaPrenda) {
-        String rutaFoto = nuevaPrenda.getRutaFoto(); // la foto aún no se guarda en la BD
         if (!gestorPrendas.guardarPrenda(nuevaPrenda)) {
             JOptionPane.showMessageDialog(this,
                     "No se ha podido guardar la prenda en la base de datos.",
@@ -423,14 +422,6 @@ public class JVentana extends JFrame {
             return;
         }
         recargarPrendasDesdeBD();
-        // conservo la foto elegida en esta sesión para la prenda recién guardada
-        for (Prenda p : todasLasPrendas) {
-            if (p.getRutaFoto() == null && rutaFoto != null
-                    && p.getNombre().equals(nuevaPrenda.getNombre())) {
-                p.setRutaFoto(rutaFoto);
-                break;
-            }
-        }
         mostrarPrendas(todasLasPrendas);
         actualizarDesplegables(); // Se actualizan los desplegables
         panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la nueva prenda
@@ -513,6 +504,7 @@ public class JVentana extends JFrame {
                 return;
             }
             prenda.setRutaFoto(rutaFoto[0]);
+            gestorPrendas.guardarFoto(prenda);
             mostrarPrendas(todasLasPrendas); // refrescar la lista
             actualizarDesplegables();        // refrescar desplegables
             panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la prenda editada
