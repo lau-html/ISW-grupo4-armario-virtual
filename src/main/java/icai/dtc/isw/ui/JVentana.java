@@ -2,30 +2,38 @@ package icai.dtc.isw.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.plaf.basic.BasicTabbedPaneUI;
 
 import icai.dtc.isw.GestorCategoriasPers;
 import icai.dtc.isw.GestorOutfits;
@@ -53,8 +61,8 @@ public class JVentana extends JFrame {
     private PanelFiltroCategorias panelFiltro; // filtro de categorias, hay que actualizarlo cuando cambian las prendas para que vea las nuevas categorias
     private final GestorCategoriasPers gestorCategoriasPers = new GestorCategoriasPers(); // mismo gestor de categorias para el filtro y el detalle
 
-    // SPRINT 2 (bonus): desplegable para ordenar por antigüedad
-    private final JComboBox<String> cbOrden = new JComboBox<>(new String[]{"Más recientes", "Más antiguas"});
+    // SPRINT 2 (bonus): desplegable para ordenar por antigüedad - Lau: lo cambio a boton para que cuadre con la estetica
+    private final JButton btnOrden = crearBoton("Más recientes"); // el texto es el orden elegido
 
     // Desplegables de la pestaña Outfits
     private JComboBox<Prenda> cbArriba = new JComboBox<>();
@@ -78,9 +86,19 @@ public class JVentana extends JFrame {
         UIManager.put("TabbedPane.focus", CREMA);    // sin recuadro de foco
 
         JTabbedPane pestanas = new JTabbedPane();
+
+        //PRUEBA, quitar el set ui si queremos volver a lo anterior
+        pestanas.setUI(new BasicTabbedPaneUI() {
+        @Override
+        protected void paintContentBorder(Graphics g, int colocacion, int seleccionada) {
+            // no dibujo el marco alrededor del contenido que no queda estetico
+        }
+        });
+
         pestanas.setBackground(CREMA);
         pestanas.setForeground(BURDEOS);
         pestanas.setFont(new Font("SansSerif", Font.BOLD, 13));
+        pestanas.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0)); // separo las pestañas de la linea verde
         pestanas.addTab("Mi armario", crearPanelArmario());
         pestanas.addTab("Outfits", crearPanelOutfits());
         pestanas.addTab("Perfil", crearPanelPerfil());
@@ -96,17 +114,42 @@ public class JVentana extends JFrame {
                 BorderFactory.createEmptyBorder(10, 18, 10, 18)));
 
         // Logo: "dress" en rosa y "B" en burdeos
-        JLabel lblLogo = new JLabel("<html><span style='color:rgb(220,135,202)'>dress</span>"
-                + "<span style='color:rgb(87,6,45)'>B</span></html>");
-        lblLogo.setFont(new Font("SansSerif", Font.BOLD, 30));
+        Font fuenteLogo; // la fuente del logo - va a ser gasoek one, la original, si no se encuentra, se usa una por defecto
+        try { // cargo la Gasoek One desde resources
+            fuenteLogo = Font.createFont(Font.TRUETYPE_FONT,
+                    getClass().getResourceAsStream("/GasoekOne-Regular.ttf")).deriveFont(Font.PLAIN, 30f);
+        } catch (Exception e) { // si falta el archivo, sigue con la fuente de siempre
+            fuenteLogo = new Font("SansSerif", Font.BOLD, 30);
+        }
+        JLabel lblDress = new JLabel("dress"); // "dress" en rosa
+        lblDress.setFont(fuenteLogo);
+        lblDress.setForeground(ROSA);
+        JLabel lblB = new JLabel("B"); // "B" en burdeos
+        lblB.setFont(fuenteLogo);
+        lblB.setForeground(BURDEOS);
+        JPanel textoLogo = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0)); // junta las dos partes
+        textoLogo.setBackground(CREMA);
+        textoLogo.add(lblDress);
+        textoLogo.add(lblB);
 
         JLabel lblLema = new JLabel("Tu armario, a tu manera.");
         lblLema.setForeground(BURDEOS);
+        lblLema.setBorder(BorderFactory.createEmptyBorder(0, 28, 0, 0)); // lo alineo con el logo
 
         JPanel panelLogo = new JPanel();
         panelLogo.setLayout(new BoxLayout(panelLogo, BoxLayout.Y_AXIS));
         panelLogo.setBackground(CREMA);
-        panelLogo.add(lblLogo);
+        // intento poner la imagen del logo de la app:
+        Image imagenLogo = new ImageIcon(getClass().getResource("/Logo_dressB_.png")).getImage()
+        .getScaledInstance(-1, 56, Image.SCALE_SMOOTH); // la achico para la cabecera
+        JLabel lblImagen = new JLabel(new ImageIcon(imagenLogo));
+        JPanel filaLogo = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0)); // imagen a la izquierda del texto
+        filaLogo.setBackground(CREMA);
+        filaLogo.add(lblImagen);
+        filaLogo.add(textoLogo);
+        filaLogo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        lblLema.setAlignmentX(Component.LEFT_ALIGNMENT); // el lema sigue a la izquierda
+        panelLogo.add(filaLogo);
         panelLogo.add(lblLema);
 
         JLabel lblSaludo = new JLabel("Hola, " + obtenerEmailUsuario());
@@ -157,11 +200,16 @@ public class JVentana extends JFrame {
         barra.add(btnListado);
 
         // SPRINT 2 (bonus): ordenar por "más recientes" / "más antiguas" (respeta los filtros activos)
-        cbOrden.addActionListener(e -> {
-            aplicarOrden();
-            panelFiltro.actualizarPrendas(todasLasPrendas);
-        });
-        barra.add(cbOrden);
+        JPopupMenu menuOrden = new JPopupMenu(); // se abre al pulsar el boton
+        JMenuItem opcionRecientes = new JMenuItem("Más recientes");
+        JMenuItem opcionAntiguas = new JMenuItem("Más antiguas");
+        opcionRecientes.addActionListener(e -> cambiarOrden("Más recientes"));
+        opcionAntiguas.addActionListener(e -> cambiarOrden("Más antiguas"));
+        menuOrden.add(opcionRecientes);
+        menuOrden.add(opcionAntiguas);
+        btnOrden.addActionListener(e -> menuOrden.show(btnOrden, 0, btnOrden.getHeight()));
+        barra.add(btnOrden);
+
         panel.add(barra, BorderLayout.NORTH);
 
         // Zona donde se muestran las prendas
@@ -185,11 +233,17 @@ public class JVentana extends JFrame {
 
     // SPRINT 2 (bonus): ordena todasLasPrendas según lo elegido en el desplegable
     private void aplicarOrden() {
-        if ("Más antiguas".equals(cbOrden.getSelectedItem())) {
+    if ("Más antiguas".equals(btnOrden.getText())) {
             gestorPrendas.ordenarMasAntiguas(todasLasPrendas);
         } else {
             gestorPrendas.ordenarMasRecientes(todasLasPrendas);
         }
+    }
+        // aplica el orden elegido en el menu y refresca la lista
+    private void cambiarOrden(String orden) {
+        btnOrden.setText(orden);
+        aplicarOrden();
+        panelFiltro.actualizarPrendas(todasLasPrendas);
     }
 
     // PESTAÑA "CREADOR DE OUTFITS"
@@ -310,9 +364,22 @@ public class JVentana extends JFrame {
             }
             JList<Prenda> lista = new JList<>(modelo);
             lista.setFont(new Font("SansSerif", Font.PLAIN, 14));
-            lista.setFixedCellHeight(30);
+            lista.setFixedCellHeight(36); // filas un poco mas altas
+            lista.setBackground(CREMA); // fondo beige
+            lista.setForeground(BURDEOS); // texto burdeos
             lista.setSelectionBackground(ROSA);
             lista.setSelectionForeground(BURDEOS);
+            lista.setCellRenderer(new DefaultListCellRenderer() {
+                @Override
+                public Component getListCellRendererComponent(JList<?> lista, Object valor, int posicion, boolean seleccionada, boolean conFoco) {
+                    JLabel fila = (JLabel) super.getListCellRendererComponent(lista, valor, posicion, seleccionada, conFoco);
+                    fila.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(235, 225, 218)), // separador fino
+                            BorderFactory.createEmptyBorder(0, 12, 0, 12))); // margen lateral
+                    return fila;
+                }
+            });
+
             listaPrendas = lista;
             // Se añade un MouseListener a la lista del catálogo para abrir la ventana emergente al hacer doble clic sobre una prenda.
             listaPrendas.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -326,7 +393,10 @@ public class JVentana extends JFrame {
                     }
                 }
             });
-            panelPrendas.add(new JScrollPane(lista), BorderLayout.CENTER);
+            JScrollPane scrollLista = new JScrollPane(lista);
+            scrollLista.getViewport().setBackground(CREMA); // fondo de la zona vacia igual que el resto
+            scrollLista.setBorder(BorderFactory.createEmptyBorder()); // quito el marco gris para que quede más estetico
+            panelPrendas.add(scrollLista, BorderLayout.CENTER);
         }
 
         panelPrendas.revalidate();

@@ -1,11 +1,21 @@
 package icai.dtc.isw.ui;
 
-import icai.dtc.isw.Prenda;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
+import icai.dtc.isw.Prenda;
+
 
 public class FormularioPrenda extends JFrame {
 
@@ -39,10 +49,10 @@ public class FormularioPrenda extends JFrame {
         txtColor = new JTextField();
         txtMarca = new JTextField();
 
-        String[] tipos = {"Camiseta", "Pantalón", "Falda", "Vestido", "Chaqueta", "Calzado", "Accesorio"};
+        String[] tipos = {"Camiseta", "Top", "Camisa", "Jersey", "Sudadera", "Pantalón", "Falda", "Vestido", "Chaqueta", "Abrigo/Cazadora", "Calzado", "Accesorio", "Joyería", "Bolso", "Otro"};
         cbTipo = new JComboBox<>(tipos);
 
-        String[] estilos = {"Casual", "Urbano", "Deportivo", "Formal", "Elegante"};
+        String[] estilos =  {"Casual", "Urbano", "Deportivo", "Formal", "Elegante", "Clásico", "Vintage", "Minimalista", "Otro"};
         cbEstilo = new JComboBox<>(estilos);
 
         String[] temporadas = {"Primavera", "Verano", "Otoño", "Invierno", "Atemporal"};
