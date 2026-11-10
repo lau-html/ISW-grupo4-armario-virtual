@@ -8,6 +8,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class OutfitDAO {
 
     public boolean registrarOutfit(Outfit outfit) {
@@ -43,6 +46,80 @@ public class OutfitDAO {
             } finally {
                 conn.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean anadirPrendaAOutfit(String nombreOutfit, int idPrenda) {
+        // Busca el ID del outfit por su nombre y lo inserta en la tabla relacional
+        String sql = "INSERT INTO outfit_prenda (outfit_id, prenda_id) VALUES ((SELECT id FROM outfit WHERE nombre = ? LIMIT 1), ?)";
+
+        try (Connection conn = ConnectionDAO.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, nombreOutfit);
+            pstmt.setInt(2, idPrenda);
+            pstmt.executeUpdate();
+
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Recupera todos los outfits y los asocia con las prendas del usuario
+    public List<Outfit> obtenerTodosLosOutfits(List<Prenda> catalogoPrendas) {
+        List<Outfit> lista = new ArrayList<>();
+        String sqlOutfits = "SELECT id, nombre FROM outfit";
+        String sqlPrendas = "SELECT prenda_id FROM outfit_prenda WHERE outfit_id = ?";
+
+        try (Connection conn = ConnectionDAO.getInstance().getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rsOutfits = stmt.executeQuery(sqlOutfits)) {
+
+            while (rsOutfits.next()) {
+                int outfitId = rsOutfits.getInt("id");
+                String nombre = rsOutfits.getString("nombre");
+
+                List<Prenda> prendasDelOutfit = new ArrayList<>();
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlPrendas)) {
+                    pstmt.setInt(1, outfitId);
+                    try (ResultSet rsPrendas = pstmt.executeQuery()) {
+                        while (rsPrendas.next()) {
+                            int prendaId = rsPrendas.getInt("prenda_id");
+                            // Buscar la prenda completa en el catálogo ya cargado
+                            for (Prenda p : catalogoPrendas) {
+                                if (p.getId() == prendaId) {
+                                    prendasDelOutfit.add(p);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                // Si el outfit tiene sus prendas, lo añadimos a la lista
+                if (!prendasDelOutfit.isEmpty()) {
+                    lista.add(new Outfit(nombre, prendasDelOutfit));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+
+    // Borra un outfit
+    // (las relaciones en outfit_prenda se borran solas por el ON DELETE CASCADE)
+    public boolean eliminarOutfit(String nombreOutfit) {
+        String sql = "DELETE FROM outfit WHERE nombre = ?";
+        try (Connection conn = ConnectionDAO.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, nombreOutfit);
+            pstmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

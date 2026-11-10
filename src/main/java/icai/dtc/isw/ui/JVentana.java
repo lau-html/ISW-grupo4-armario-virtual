@@ -20,6 +20,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -68,6 +69,9 @@ public class JVentana extends JFrame {
     private JComboBox<Prenda> cbArriba = new JComboBox<>();
     private JComboBox<Prenda> cbAbajo = new JComboBox<>();
     private JComboBox<Prenda> cbAccesorios = new JComboBox<>();
+
+    private DefaultListModel<Outfit> modeloOutfits = new DefaultListModel<>();
+    private JList<Outfit> listaOutfits = new JList<>(modeloOutfits);
 
     public JVentana() {
         super("dressB");
@@ -254,6 +258,15 @@ public class JVentana extends JFrame {
         panelFiltro.actualizarPrendas(todasLasPrendas);
     }
 
+    private void recargarOutfitsDesdeBD() {
+        modeloOutfits.clear();
+        GestorOutfits gestor = new GestorOutfits();
+        List<Outfit> guardados = gestor.cargarOutfits(todasLasPrendas);
+        for (Outfit o : guardados) {
+            modeloOutfits.addElement(o);
+        }
+    }
+
     // PESTAÑA "CREADOR DE OUTFITS"
     private JPanel crearPanelOutfits() {
         JPanel panel = new JPanel(new BorderLayout());
@@ -288,9 +301,88 @@ public class JVentana extends JFrame {
 
         actualizarDesplegables(); // Carga las opciones iniciales si las hubiera
 
-        panel.add(panelLienzo, BorderLayout.CENTER);
+        panel.add(panelLienzo, BorderLayout.WEST);
 
-        // Barra inferior con botón de guardado
+        // 1. Configuramos el panel izquierdo (formulario) para que aparezca bien
+        JPanel panelIzquierdo = new JPanel(new BorderLayout());
+        panelIzquierdo.setBackground(CREMA);
+        panelIzquierdo.add(panelLienzo, BorderLayout.NORTH); // El grid se queda arriba
+
+        // 2. Configuramos la lista con un diseño personalizado (nombre + papelera)
+        listaOutfits.setBackground(CREMA);
+        listaOutfits.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                JPanel panelFila = new JPanel(new BorderLayout());
+                panelFila.setBackground(isSelected ? ROSA : CREMA);
+                panelFila.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(235, 225, 218)));
+
+                JLabel lblTexto = new JLabel(value.toString());
+                lblTexto.setForeground(BURDEOS);
+                lblTexto.setFont(new Font("SansSerif", Font.PLAIN, 14));
+                lblTexto.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+
+                JLabel lblPapelera = new JLabel("🗑️"); // Emoticono de papelera
+                lblPapelera.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
+                lblPapelera.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 15));
+                lblPapelera.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+                panelFila.add(lblTexto, BorderLayout.CENTER);
+                panelFila.add(lblPapelera, BorderLayout.EAST);
+                return panelFila;
+            }
+        });
+
+        // Listener para detectar si se hace clic en la papelera o doble clic en la fila
+        listaOutfits.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                int index = listaOutfits.locationToIndex(e.getPoint());
+                if (index != -1) {
+                    Outfit outfitSeleccionado = modeloOutfits.getElementAt(index);
+
+                    // Si el clic está en los últimos 40 píxeles de la derecha (donde está la papelera)
+                    if (e.getX() > listaOutfits.getWidth() - 40) {
+                        int confirmar = JOptionPane.showConfirmDialog(JVentana.this,
+                                "¿Estás seguro de que quieres borrar el look '" + outfitSeleccionado.getNombre() + "'?",
+                                "Confirmar borrado", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+                        if (confirmar == JOptionPane.YES_OPTION) {
+                            GestorOutfits gestor = new GestorOutfits();
+                            if (gestor.eliminarOutfit(outfitSeleccionado.getNombre())) {
+                                modeloOutfits.remove(index); // Lo borra visualmente
+                            } else {
+                                JOptionPane.showMessageDialog(JVentana.this, "Error al borrar el outfit en la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                        return; // Salimos para que no intente abrir las fotos tras borrar
+                    }
+
+                    // Si hace doble clic en la fila (y no en la papelera)
+                    if (e.getClickCount() == 2 && outfitSeleccionado.getPrendas().size() >= 2) {
+                        mostrarImagenesOutfit(outfitSeleccionado);
+                    }
+                }
+            }
+        });
+
+        JScrollPane scrollOutfits = new JScrollPane(listaOutfits);
+        scrollOutfits.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(ROSA), "Mis Outfits Guardados",
+                javax.swing.border.TitledBorder.LEFT, javax.swing.border.TitledBorder.TOP,
+                new Font("SansSerif", Font.BOLD, 14), BURDEOS));
+        scrollOutfits.getViewport().setBackground(CREMA);
+        scrollOutfits.setPreferredSize(new java.awt.Dimension(250, 0)); // Anchura fija mínima para que no se aplaste
+
+        // 3. Juntamos izquierda y derecha en un panel dividido
+        JPanel panelCentralDividido = new JPanel(new BorderLayout(20, 0));
+        panelCentralDividido.setBackground(CREMA);
+        panelCentralDividido.add(panelIzquierdo, BorderLayout.CENTER); // Formulario usa el espacio disponible
+        panelCentralDividido.add(scrollOutfits, BorderLayout.EAST);   // Lista fija a la derecha
+
+        panel.add(panelCentralDividido, BorderLayout.CENTER);
+
+        // 4. Barra inferior con botón de guardado
         JPanel barraInferior = new JPanel(new FlowLayout(FlowLayout.CENTER));
         barraInferior.setBackground(CREMA);
         JButton btnGuardar = crearBoton("Guardar Outfit");
@@ -301,23 +393,47 @@ public class JVentana extends JFrame {
             Prenda abajo = (Prenda) cbAbajo.getSelectedItem();
             Prenda accesorios = (Prenda) cbAccesorios.getSelectedItem();
 
-            if (nombre.isEmpty() || arriba == null || abajo == null || accesorios == null) {
-                JOptionPane.showMessageDialog(this, "Por favor, asigna un nombre y selecciona todas las prendas.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            if (nombre.isEmpty() || arriba == null || abajo == null || arriba.getId() == -1 || abajo.getId() == -1) {
+                JOptionPane.showMessageDialog(this, "Por favor, asigna un nombre y selecciona al menos prenda superior e inferior.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
+            }
+            if (arriba.getId() == abajo.getId()) {
+                JOptionPane.showMessageDialog(this, "No puedes repetir la misma prenda arriba y abajo.", "Prendas duplicadas", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            // Confirmación antes de crear
+            int confirmacion = JOptionPane.showConfirmDialog(this,
+                    "¿Estás seguro de que quieres crear este outfit?",
+                    "Confirmar creación",
+                    JOptionPane.YES_NO_OPTION);
+
+            if (confirmacion != JOptionPane.YES_OPTION) {
+                return; // Si el usuario elige "No", cancelamos el guardado
             }
 
             List<Prenda> prendasSeleccionadas = new ArrayList<>();
             prendasSeleccionadas.add(arriba);
             prendasSeleccionadas.add(abajo);
-            prendasSeleccionadas.add(accesorios);
 
-            // Creamos el objeto Outfit unificado pasándole el nombre y la lista de prendas
+            if (accesorios != null && accesorios.getId() != -1) {
+                if (accesorios.getId() == arriba.getId() || accesorios.getId() == abajo.getId()) {
+                    JOptionPane.showMessageDialog(this, "El accesorio no puede ser igual a las prendas principales.", "Prendas duplicadas", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                prendasSeleccionadas.add(accesorios);
+            }
+
             Outfit nuevoOutfit = new Outfit(nombre, prendasSeleccionadas);
-
             GestorOutfits gestor = new GestorOutfits();
-            if (gestor.guardarNuevoOutfit(nombre, prendasSeleccionadas)) { // O gestor.guardarNuevoOutfit(nuevoOutfit) según prefiera su gestor
+
+            if (gestor.guardarNuevoOutfit(nombre, prendasSeleccionadas)) {
                 JOptionPane.showMessageDialog(this, "¡Outfit guardado con éxito!");
                 txtNombre.setText("");
+                cbAccesorios.setSelectedIndex(0);
+
+                // Añadimos el objeto Outfit real a la lista
+                modeloOutfits.addElement(nuevoOutfit);
             } else {
                 JOptionPane.showMessageDialog(this, "Error al guardar el outfit en la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -326,7 +442,86 @@ public class JVentana extends JFrame {
         barraInferior.add(btnGuardar);
         panel.add(barraInferior, BorderLayout.SOUTH);
 
+        recargarOutfitsDesdeBD();
         return panel;
+    }
+
+    // Muestra una ventana emergente dinámica (2 o 3 prendas)
+    private void mostrarImagenesOutfit(Outfit outfit) {
+        JDialog dialog = new JDialog(this, "Outfit: " + outfit.getNombre(), true);
+        dialog.setSize(300, 650); // Un poco más alta para que quepan 3 elementos
+        dialog.setLocationRelativeTo(this);
+        dialog.getContentPane().setBackground(CREMA);
+
+        // 3 filas: Arriba, Abajo, Accesorio (o botón)
+        JPanel panelFotos = new JPanel(new GridLayout(3, 1, 10, 10));
+        panelFotos.setBackground(CREMA);
+        panelFotos.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // 1. Prenda Superior
+        panelFotos.add(crearLabelFotoPrenda(outfit.getPrendas().get(0)));
+
+        // 2. Prenda Inferior
+        panelFotos.add(crearLabelFotoPrenda(outfit.getPrendas().get(1)));
+
+        // 3. Accesorio o Botón
+        if (outfit.getPrendas().size() > 2) {
+            // Tiene accesorio, mostramos su foto
+            panelFotos.add(crearLabelFotoPrenda(outfit.getPrendas().get(2)));
+        } else {
+            // No tiene accesorio, mostramos el botón centrado
+            JButton btnAnadirAccesorio = crearBoton("+ Añadir accesorio");
+            JPanel panelBtn = new JPanel(new java.awt.GridBagLayout()); // Centra el botón
+            panelBtn.setBackground(CREMA);
+            panelBtn.add(btnAnadirAccesorio);
+
+            // Lógica por si el usuario decide añadirlo ahora
+            btnAnadirAccesorio.addActionListener(e -> {
+                JComboBox<Prenda> combo = new JComboBox<>();
+                // Rellenar con las prendas del armario (saltando la opción 0 que es "Ninguno")
+                for (int i = 1; i < cbAccesorios.getItemCount(); i++) {
+                    combo.addItem(cbAccesorios.getItemAt(i));
+                }
+
+                int opcion = JOptionPane.showConfirmDialog(dialog, combo, "Elige tu accesorio", JOptionPane.OK_CANCEL_OPTION);
+                if (opcion == JOptionPane.OK_OPTION) {
+                    Prenda nuevoAccesorio = (Prenda) combo.getSelectedItem();
+                    if (nuevoAccesorio != null) {
+                        outfit.getPrendas().add(nuevoAccesorio); // Lo añadimos visualmente
+
+                        // --- NUEVO: Guardado automático en base de datos ---
+                        GestorOutfits gestorOutfits = new GestorOutfits();
+                        gestorOutfits.anadirAccesorioAOutfit(outfit.getNombre(), nuevoAccesorio.getId());
+                        // ---------------------------------------------------
+
+                        dialog.dispose();
+                        mostrarImagenesOutfit(outfit);
+                        // (Hemos eliminado el JOptionPane temporal que salía antes)
+                    }
+                }
+            });
+            panelFotos.add(panelBtn);
+        }
+
+        // Metemos el panel en un Scroll por si la pantalla es muy pequeña
+        JScrollPane scroll = new JScrollPane(panelFotos);
+        scroll.setBorder(null);
+        dialog.add(scroll);
+        dialog.setVisible(true);
+    }
+
+    // Metodo auxiliar para generar la imagen de forma limpia
+    private JLabel crearLabelFotoPrenda(Prenda prenda) {
+        JLabel lbl = new JLabel(prenda.getNombre(), SwingConstants.CENTER);
+        lbl.setHorizontalTextPosition(JLabel.CENTER);
+        lbl.setVerticalTextPosition(JLabel.BOTTOM);
+        if (prenda.getRutaFoto() != null && !prenda.getRutaFoto().isEmpty()) {
+            try {
+                Image img = new ImageIcon(prenda.getRutaFoto()).getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                lbl.setIcon(new ImageIcon(img));
+            } catch (Exception ignored) {} // Si no tiene foto, solo sale el texto
+        }
+        return lbl;
     }
 
     // Actualiza los desplegables de outfits con los datos actuales
@@ -334,6 +529,12 @@ public class JVentana extends JFrame {
         cbArriba.removeAllItems();
         cbAbajo.removeAllItems();
         cbAccesorios.removeAllItems();
+
+        // Crea una prenda ficticia que represente "Ninguno"
+        Prenda sinAccesorio = new Prenda();
+        sinAccesorio.setId(-1);
+        sinAccesorio.setNombre("Ninguno");
+        cbAccesorios.addItem(sinAccesorio);
 
         for (Prenda p : todasLasPrendas) {
             cbArriba.addItem(p);

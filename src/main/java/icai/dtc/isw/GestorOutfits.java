@@ -13,4 +13,19 @@ public class GestorOutfits {
         OutfitDAO dao = new OutfitDAO();
         return dao.registrarOutfit(nuevoOutfit);
     }
+
+    public boolean anadirAccesorioAOutfit(String nombreOutfit, int idPrenda) {
+        OutfitDAO dao = new OutfitDAO();
+        return dao.anadirPrendaAOutfit(nombreOutfit, idPrenda);
+    }
+
+    public List<Outfit> cargarOutfits(List<Prenda> todasLasPrendas) {
+        OutfitDAO dao = new OutfitDAO();
+        return dao.obtenerTodosLosOutfits(todasLasPrendas);
+    }
+
+    public boolean eliminarOutfit(String nombreOutfit) {
+        OutfitDAO dao = new OutfitDAO();
+        return dao.eliminarOutfit(nombreOutfit);
+    }
 }

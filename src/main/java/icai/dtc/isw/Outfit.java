@@ -37,21 +37,41 @@ public class Outfit implements Serializable {
     }
 
     // Getters y Setters principales
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId() {
+        return id;
+    }
 
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public List<Prenda> getPrendas() { return prendas; }
-    public void setPrendas(List<Prenda> prendas) { this.prendas = prendas; }
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public List<Prenda> getPrendas() {
+        return prendas;
+    }
+
+    public void setPrendas(List<Prenda> prendas) {
+        this.prendas = prendas;
+    }
 
     // Getters y Setters de favoritos
-    public boolean isFavorito() { return esFavorito; }
-    public void setFavorito(boolean favorito) { this.esFavorito = favorito; }
+    public boolean isFavorito() {
+        return esFavorito;
+    }
+
+    public void setFavorito(boolean favorito) {
+        this.esFavorito = favorito;
+    }
 
     @Override
     public String toString() {
-        return nombre + " (Total prendas: " + (prendas != null ? prendas.size() : 0) + ")";
+        return "👗 " + nombre + " (" + prendas.size() + " prendas)";
     }
 }
