@@ -18,7 +18,7 @@ public class VentanaRegistro extends JFrame {
     public VentanaRegistro() {
         gestorUsuarios = new GestorUsuarios();
 
-        setTitle(" Dress Better - Registro de Usuario - Armario Virtual");
+        setTitle(" dressB - Registro de Usuario ");
         setSize(400, 260);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);

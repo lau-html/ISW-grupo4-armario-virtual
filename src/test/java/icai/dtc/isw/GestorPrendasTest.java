@@ -2,7 +2,6 @@ package icai.dtc.isw;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,9 +17,9 @@ class GestorPrendasTest {
     void setUp() {
         gestor = new GestorPrendas();
         armario = new ArrayList<>();
-        armario.add(new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco"));
-        armario.add(new Prenda(2, "Vaqueros", "Pantalones", "Azul"));
-        armario.add(new Prenda(3, "Pantalones Deporte", "Pantalones", "Negro"));
+        armario.add(new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco", "Camiseta de manga corta", "Casual", "Nike", "Verano"));
+        armario.add(new Prenda(2, "Vaqueros", "Pantalones", "Azul", "Vaqueros rectos", "Casual", "Levis", "Atemporal"));
+        armario.add(new Prenda(3, "Pantalones Deporte", "Pantalones", "Negro", "Pantalones para entrenar", "Deportivo", "Adidas", "Invierno"));
     }
 
     @Test

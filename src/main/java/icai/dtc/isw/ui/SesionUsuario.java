@@ -15,6 +15,16 @@ public class SesionUsuario {
         return usuarioLogueado;
     }
 
+    // SPRINT 2: mismo usuario, con el nombre que pide el enunciado (getUsuarioActual)
+    public static Usuario getUsuarioActual() {
+        return usuarioLogueado;
+    }
+
+    // SPRINT 2: true si hay alguien con sesión iniciada
+    public static boolean haySesion() {
+        return usuarioLogueado != null && usuarioLogueado.getEmail() != null;
+    }
+
     // Limpia los datos del usuario en memoria cuando cierra sesion
     public static void cerrarSesion() {
         usuarioLogueado = null;

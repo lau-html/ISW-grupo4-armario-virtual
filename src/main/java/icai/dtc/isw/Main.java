@@ -1,7 +1,6 @@
 package icai.dtc.isw;
 
 import java.io.Serializable;
-import icai.dtc.isw.Prenda;
 
 public class Main implements Serializable {
 
@@ -10,7 +9,7 @@ public class Main implements Serializable {
     // Atributos de la prenda: de momento id + los del formulario, se podrian añadir mas en el futuro
     private int id;
     private String nombre;
-    private String tipo; // tipo de ropa (falda, pantalón, camiseta, etc.)
+    private String tipo;
     private String color;
     private String descripcion;
     private String estilo;
@@ -38,7 +37,7 @@ public class Main implements Serializable {
     }
 
 
-    // Constructor con id pero sin campos nuevos del formulario (lo usan los tests de GestorPrendas) 
+    // Constructor con id pero sin campos nuevos del formulario (lo usan los tests de GestorPrendas)
     // Lau: da error si lo eliminamos (porque los tests de GestorPrendas lo usan de momento)
     public Main(int id, String nombre, String tipo, String color) {
         this.id = id;
@@ -87,13 +86,6 @@ public class Main implements Serializable {
         this.descripcion = descripcion;
     }
 
-    /*public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    } */
 
     public String getMarca() {
         return marca;
