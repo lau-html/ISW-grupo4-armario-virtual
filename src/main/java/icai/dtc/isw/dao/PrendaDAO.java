@@ -7,6 +7,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import icai.dtc.isw.Prenda;
 
@@ -49,8 +53,8 @@ public class PrendaDAO {
             return false;
         }
 
-        String sql = "INSERT INTO prenda (nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, categorias, favorito, ruta_foto) "
-        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+        String sql = "INSERT INTO prenda (nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, categorias, favorito, ruta_foto,foto) "
+        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)";
 
         Connection conn = ConnectionDAO.getInstance().getConnection();
 
@@ -66,6 +70,7 @@ public class PrendaDAO {
             pstmt.setString(9, categoriasComoTexto(prenda.getCategoriasPersonalizadas())); // las categorias juntas 
             pstmt.setBoolean(10, prenda.isEsFavorito());
             pstmt.setString(11,prenda.getRutaFoto());
+            pstmt.setBytes(12, leerFoto(prenda.getRutaFoto()));
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -87,7 +92,7 @@ public class PrendaDAO {
         // El orden solo puede valer ASC o DESC, así que concatenarlo es seguro.
         // El email SIEMPRE va con "?" para evitar inyección SQL.
         String orden = masRecientesPrimero ? "DESC" : "ASC";
-        String sql = "SELECT id, nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, fecha_creacion, categorias, favorito,ruta_foto "
+        String sql = "SELECT id, nombre, descripcion, tipo, estilo, color, marca, temporada, usuario_email, fecha_creacion, categorias, favorito,ruta_foto,foto "
                 + "FROM prenda WHERE usuario_email = ? "
                 + "ORDER BY fecha_creacion " + orden + ", id " + orden;
         Connection conn = ConnectionDAO.getInstance().getConnection();
@@ -112,7 +117,7 @@ public class PrendaDAO {
                     }
                     p.setCategoriasPersonalizadas(textoACategorias(rs.getString("categorias"))); // las recupero de la BD
                     p.setEsFavorito(rs.getBoolean("favorito"));
-                    p.setRutaFoto(rs.getString("ruta_foto"));
+                    p.setRutaFoto(guardarFotoTemporal(rs.getInt("id"), rs.getBytes("foto"), rs.getString("ruta_foto")));
                     prendas.add(p);
                 }
             }
@@ -200,17 +205,51 @@ public class PrendaDAO {
 
     // guarda en la BD la ruta de la foto de una prenda, solo si es de ese usuario
     public boolean actualizarFoto(int id, String rutaFoto, String usuarioEmail) {
-        String sql = "UPDATE prenda SET ruta_foto = ? WHERE id = ? AND usuario_email = ?";
+        String sql = "UPDATE prenda SET ruta_foto = ?, foto = ? WHERE id = ? AND usuario_email = ?";
         Connection conn = ConnectionDAO.getInstance().getConnection();
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, rutaFoto);
-            pstmt.setInt(2, id);
-            pstmt.setString(3, usuarioEmail);
+            pstmt.setBytes(2, leerFoto(rutaFoto));
+            pstmt.setInt(3, id);
+            pstmt.setString(4, usuarioEmail);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error al guardar la foto de la prenda " + id);
             e.printStackTrace();
             return false;
+        }
+    }
+
+    // Lee la imagen del ordenador y la convierte en bytes para guardarla en la BD
+    private byte[] leerFoto(String rutaFoto) {
+        if (rutaFoto == null || rutaFoto.isBlank()) {
+            return null; // la prenda no tiene foto
+        }
+        try {
+            return Files.readAllBytes(Path.of(rutaFoto));
+        } catch (IOException e) {
+            System.out.println("No se ha podido leer la foto: " + rutaFoto);
+            return null;
+        }
+    }
+
+    // Escribe la imagen de la BD en un archivo temporal de este ordenador y devuelve su ruta,
+    private String guardarFotoTemporal(int id, byte[] foto, String rutaOriginal) {
+        if (foto == null) {
+            return rutaOriginal;
+        }
+        try {
+            String extension = ".jpg";
+            if (rutaOriginal != null && rutaOriginal.contains(".")) {
+                extension = rutaOriginal.substring(rutaOriginal.lastIndexOf('.'));
+            }
+            File temporal = File.createTempFile("dressB_prenda_" + id + "_", extension);
+            temporal.deleteOnExit(); // se borra al cerrar la aplicación
+            Files.write(temporal.toPath(), foto);
+            return temporal.getAbsolutePath();
+        } catch (IOException e) {
+            System.out.println("No se ha podido mostrar la foto de la prenda " + id);
+            return rutaOriginal;
         }
     }
 }
