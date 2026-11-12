@@ -8,7 +8,8 @@ import java.util.List;
 import icai.dtc.isw.dao.PrendaDAO;
 import icai.dtc.isw.ui.SesionUsuario;
 
-public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
+public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS
+
     // Busca una prenda por su id. Devuelve null si no existe.
     public Prenda buscarPorId(List<Prenda> prendas, int id) {
         for (Prenda prenda : prendas) {
@@ -27,18 +28,20 @@ public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
             return false;
         }
         prenda.setNombre(nombre);
-        prenda.setTipo(tipo);
+        prenda.setTipo(tipo); // antes ponía setEstilo: al editar el tipo se cambiaba el estilo
         prenda.setColor(color);
         return true;
     }
 
     // Elimina la prenda con ese id.
     // Devuelve true si la ha encontrado y borrado, false si no existe.
+    // CORRECCIÓN: Se han quitado los parámetros "nombre", "tipo" y "color" que sobraban
     public boolean eliminarPrenda(List<Prenda> prendas, int id) {
         return prendas.removeIf(prenda -> prenda.getId() == id);
     }
 
-    // ======================= SPRINT 2: PRENDAS POR USUARIO =======================
+    // ======================= SPRINT 2: PRENDAS GUARDADAS EN LA BD =======================
+    // Los métodos de arriba (Sprint 1) siguen igual: trabajan solo con la lista y los usan los tests.
 
     private final PrendaDAO prendaDAO = new PrendaDAO();
 
@@ -56,23 +59,17 @@ public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
         return prendaDAO.getPrendasUsuario(email, masRecientes);
     }
 
-    /**
-     * Guarda la prenda en la BD a nombre del usuario activo (SesionUsuario.getUsuarioActual()).
-     * Devuelve true si se ha guardado.
-     */
+    /** Guarda la prenda en la BD a nombre del usuario activo. Devuelve true si se ha guardado. */
     public boolean guardarPrenda(Prenda prenda) {
         if (!SesionUsuario.haySesion()) {
             System.out.println("No hay sesión iniciada: no se puede guardar la prenda.");
             return false;
         }
-        prenda.setUsuarioEmail(SesionUsuario.getUsuarioActual().getEmail());
+        prenda.setCorreoUsuario(SesionUsuario.getUsuarioActual().getEmail());
         return prendaDAO.guardarPrendaUsuario(prenda);
     }
 
-    /**
-     * SPRINT 2: edita la prenda en la BD y, si va bien, también en la lista en memoria.
-     * Devuelve true si se ha guardado el cambio.
-     */
+    /** Edita la prenda en la BD y, si va bien, también en la lista. Devuelve true si se ha guardado. */
     public boolean editarPrendaGuardada(List<Prenda> prendas, int id, String nombre, String tipo, String color) {
         if (!SesionUsuario.haySesion()) {
             System.out.println("No hay sesión iniciada: no se puede editar la prenda.");
@@ -85,10 +82,7 @@ public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
         return editarPrenda(prendas, id, nombre, tipo, color);
     }
 
-    /**
-     * SPRINT 2: borra la prenda de la BD y, si va bien, también de la lista en memoria.
-     * Devuelve true si se ha borrado.
-     */
+    /** Borra la prenda de la BD y, si va bien, también de la lista. Devuelve true si se ha borrado. */
     public boolean eliminarPrendaGuardada(List<Prenda> prendas, int id) {
         if (!SesionUsuario.haySesion()) {
             System.out.println("No hay sesión iniciada: no se puede eliminar la prenda.");
@@ -102,7 +96,6 @@ public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
     }
 
     // BONUS: ordenar una lista ya cargada sin volver a consultar la BD (Comparator).
-    // Las prendas sin fecha (p. ej. las de prueba en memoria) se quedan al final.
     public void ordenarMasAntiguas(List<Prenda> prendas) {
         prendas.sort(Comparator.comparing(Prenda::getFechaCreacion,
                         Comparator.nullsLast(Comparator.<LocalDateTime>naturalOrder()))
@@ -114,4 +107,25 @@ public class GestorPrendas { //SPRINT 1: EDITAR Y ELIMINAR PRENDAS
                         Comparator.nullsLast(Comparator.<LocalDateTime>reverseOrder()))
                 .thenComparing(Comparator.comparingInt(Prenda::getId).reversed()));
     }
+
+    // Guarda en la BD las categorias y el favorito de la prenda y devuelve true si se ha guardado bien
+    public boolean guardarCategoriasYFavorito(Prenda prenda) {
+        if (!SesionUsuario.haySesion()) {
+            System.out.println("No hay sesión iniciada: no se pueden guardar las categorias.");
+            return false;
+        }
+        String email = SesionUsuario.getUsuarioActual().getEmail();
+        return prendaDAO.actualizarCategoriasYFavorito(prenda.getId(), prenda.getCategoriasPersonalizadas(), prenda.isEsFavorito(), email);
+    }
+
+    // Guarda en la BD la foto de la prenda y devuelve true si se ha guardado bien
+    public boolean guardarFoto(Prenda prenda) {
+        if (!SesionUsuario.haySesion()) {
+            System.out.println("No hay sesión iniciada: no se puede guardar la foto.");
+            return false;
+        }
+        String email = SesionUsuario.getUsuarioActual().getEmail();
+        return prendaDAO.actualizarFoto(prenda.getId(), prenda.getRutaFoto(), email);
+    }
+
 }
