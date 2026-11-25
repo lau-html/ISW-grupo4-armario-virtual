@@ -91,6 +91,20 @@ public class PanelFiltroCategorias extends JPanel {
             submenuPers.add(opcion);
         }
         anadirOpcionQuitar(submenuPers, "categoriaPersonalizada");
+        // opcion para borrar una categoria personalizada
+        submenuPers.addSeparator();
+        JMenuItem borrar = new JMenuItem("Borrar categoría...");
+        borrar.addActionListener(e -> {
+            if (DialogoBorrarCategoria.mostrar(this, gestorPers, prendas)) {
+                // si estaba filtrando por la categoria borrada, quito ese filtro
+                String filtroCat = filtrosActivos.get("categoriaPersonalizada");
+                if (filtroCat != null && !gestorPers.getCategorias().contains(filtroCat)) {
+                    filtrosActivos.remove("categoriaPersonalizada");
+                }
+                reaplicar();
+            }
+        });
+        submenuPers.add(borrar);
         menuCategorias.add(submenuPers);
 
         if (!filtrosActivos.isEmpty()) { // opcion para limpiar todos los filtros de golpe
