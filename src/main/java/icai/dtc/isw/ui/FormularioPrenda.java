@@ -14,14 +14,19 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import icai.dtc.isw.EstiloPrenda;
 import icai.dtc.isw.Prenda;
+import icai.dtc.isw.Temporada;
+import icai.dtc.isw.TipoPrenda;
 
 
 public class FormularioPrenda extends JFrame {
 
     // 1. Declarar los componentes visuales y la referencia a la ventana principal
     private JTextField txtNombre, txtDescripcion, txtColor, txtMarca;
-    private JComboBox<String> cbTipo, cbEstilo, cbTemporada;
+    private JComboBox<TipoPrenda> cbTipo;
+    private JComboBox<EstiloPrenda> cbEstilo;
+    private JComboBox<Temporada> cbTemporada;
     private JButton btnGuardar;
     private JVentana ventanaPrincipal;
     private JButton btnFoto;            // botón para elegir la foto de la prenda
@@ -49,14 +54,9 @@ public class FormularioPrenda extends JFrame {
         txtColor = new JTextField();
         txtMarca = new JTextField();
 
-        String[] tipos = {"Camiseta", "Top", "Camisa", "Jersey", "Sudadera", "Pantalón", "Falda", "Vestido", "Chaqueta", "Abrigo/Cazadora", "Calzado", "Accesorio", "Joyería", "Bolso", "Otro"};
-        cbTipo = new JComboBox<>(tipos);
-
-        String[] estilos =  {"Casual", "Urbano", "Deportivo", "Formal", "Elegante", "Clásico", "Vintage", "Minimalista", "Otro"};
-        cbEstilo = new JComboBox<>(estilos);
-
-        String[] temporadas = {"Primavera", "Verano", "Otoño", "Invierno", "Atemporal"};
-        cbTemporada = new JComboBox<>(temporadas);
+        cbTipo = new JComboBox<>(TipoPrenda.values());
+        cbEstilo = new JComboBox<>(EstiloPrenda.values());
+        cbTemporada = new JComboBox<>(Temporada.values());
 
         // 3. Añadir los componentes a la ventana (Etiqueta + Campo)
         add(new JLabel(" Nombre:"));
@@ -106,12 +106,12 @@ public class FormularioPrenda extends JFrame {
     private void guardarDatos() {
         // Recoger los datos que el usuario ha escrito
         String nombre = txtNombre.getText().trim();
-        String tipo = (String) cbTipo.getSelectedItem();
+        String tipo = ((TipoPrenda) cbTipo.getSelectedItem()).getEtiqueta();
         String descripcion = txtDescripcion.getText().trim();
-        String estilo = (String) cbEstilo.getSelectedItem();
+        String estilo = ((EstiloPrenda) cbEstilo.getSelectedItem()).getEtiqueta();
         String color = txtColor.getText().trim();
         String marca = txtMarca.getText().trim();
-        String temporada = (String) cbTemporada.getSelectedItem();
+        String temporada = ((Temporada) cbTemporada.getSelectedItem()).getEtiqueta();
 
         // Validación en el frontal
         if (nombre.isEmpty() || color.isEmpty()) {

@@ -17,21 +17,21 @@ class GestorCategoriasTest {
     void filtrarPorTipo() {
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-                new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Casual", "Nike", "Verano"),
-                new Prenda("Vaqueros", "Vaqueros rectos", "Pantalones", "Azul", "Casual", "Levis", "Atemporal"),
-                new Prenda("Pantalón", "Pantalon de vestir", "Pantalones", "Negro", "Elegante", "Zara", "Invierno")
+                new Prenda("Camiseta", "Camiseta basica", "Camiseta", "Blanco", "Casual", "Nike", "Verano"),
+                new Prenda("Vaqueros", "Vaqueros rectos", "Pantalón", "Azul", "Casual", "Levis", "Atemporal"),
+                new Prenda("Pantalón", "Pantalon de vestir", "Pantalón", "Negro", "Elegante", "Zara", "Invierno")
         );
-        List<Prenda> pantalones = gestor.filtrarPor(armario, Prenda::getTipo, "Pantalones");
+        List<Prenda> pantalones = gestor.filtrarPor(armario, Prenda::getTipo, "Pantalón");
         assertEquals(2, pantalones.size());
-        assertTrue(pantalones.stream().allMatch(p -> p.getTipo().equals("Pantalones")));
+        assertTrue(pantalones.stream().allMatch(p -> p.getTipo().equals("Pantalón")));
     }
 
     @Test
     void filtrarPorMarca() {
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-                new Prenda(1, "Camiseta Nike", "Camisetas", "Blanco", "Camiseta de manga corta", "Casual", "Nike", "Verano"),
-                new Prenda(2, "Abrigo", "Abrigos", "Beige", "Abrigo largo", "Formal", "Zara", "Invierno")
+                new Prenda(1, "Camiseta Nike", "Camiseta", "Blanco", "Camiseta de manga corta", "Casual", "Nike", "Verano"),
+                new Prenda(2, "Abrigo", "Abrigo/Cazadora", "Beige", "Abrigo largo", "Formal", "Zara", "Invierno")
         );
         List<Prenda> resultado = gestor.filtrarPor(armario, Prenda::getMarca, "Zara");
         assertEquals(1, resultado.size());
@@ -42,7 +42,7 @@ class GestorCategoriasTest {
     void categoriaInexistenteDevuelveVacio() {
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-                new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Casual", "Nike", "Verano")
+                new Prenda("Camiseta", "Camiseta basica", "Camiseta", "Blanco", "Casual", "Nike", "Verano")
         );
         List<Prenda> bufandas = gestor.filtrarPor(armario, Prenda::getTipo, "Bufandas");
         assertNotNull(bufandas);
@@ -53,11 +53,11 @@ class GestorCategoriasTest {
     void filtrarCombinadoTipoYMarca() {
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-                new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Casual", "Nike", "Verano"), // cumple tipo, no marca
-                new Prenda("Pantalón", "Pantalon de vestir", "Pantalones", "Negro", "Elegante", "Zara", "Invierno"), // cumple marca, no tipo
-                new Prenda("Top", "Top de tirantes", "Camisetas", "Rojo", "Casual", "Zara", "Verano") // cumple los dos
+                new Prenda("Camiseta", "Camiseta basica", "Camiseta", "Blanco", "Casual", "Nike", "Verano"), // cumple tipo, no marca
+                new Prenda("Pantalón", "Pantalon de vestir", "Pantalón", "Negro", "Elegante", "Zara", "Invierno"), // cumple marca, no tipo
+                new Prenda("Top", "Top de tirantes", "Camiseta", "Rojo", "Casual", "Zara", "Verano") // cumple los dos
         );
-        Map<String, String> filtros = Map.of("tipo", "Camisetas", "marca", "Zara");
+        Map<String, String> filtros = Map.of("tipo", "Camiseta", "marca", "Zara");
         List<Prenda> resultado = gestor.filtrarCombinado(armario, filtros);
         assertEquals(1, resultado.size());
         assertEquals("Top", resultado.get(0).getNombre());
@@ -68,15 +68,15 @@ class GestorCategoriasTest {
         GestorCategorias gestor = new GestorCategorias();
 
         // preparo prendas que cumplen una parte, las dos o ninguna, a posta
-        Prenda vestido = new Prenda("Vestido", "Vestido largo", "Vestidos", "Rojo", "Elegante", "Zara", "Verano");
+        Prenda vestido = new Prenda("Vestido", "Vestido largo", "Vestido", "Rojo", "Elegante", "Zara", "Verano");
         vestido.setCategoriasPersonalizadas(new ArrayList<>(List.of("Para salir"))); // categoria SI, marca SI
 
-        Prenda camiseta = new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Casual", "Nike", "Verano");
+        Prenda camiseta = new Prenda("Camiseta", "Camiseta basica", "Camiseta", "Blanco", "Casual", "Nike", "Verano");
         camiseta.setCategoriasPersonalizadas(new ArrayList<>(List.of("Para salir"))); // categoria SI, marca NO
 
-        Prenda blazer = new Prenda("Blazer", "Blazer entallado", "Abrigos", "Negro", "Elegante", "Zara", "Invierno"); // categoria NO, marca SI
+        Prenda blazer = new Prenda("Blazer", "Blazer entallado", "Abrigo/Cazadora", "Negro", "Elegante", "Zara", "Invierno"); // categoria NO, marca SI
 
-        Prenda cinturon = new Prenda("Cinturón", "Cinturon de piel", "Accesorios", "Marron", "Casual", "Zara", "Atemporal");
+        Prenda cinturon = new Prenda("Cinturón", "Cinturon de piel", "Accesorio", "Marron", "Casual", "Zara", "Atemporal");
         cinturon.setCategoriasPersonalizadas(null); // lista a null a posta: no debe romper el filtro, solo no pasa
 
         List<Prenda> armario = List.of(vestido, camiseta, blazer, cinturon);
@@ -95,8 +95,8 @@ class GestorCategoriasTest {
     void filtrarConAtributoNullNoFalla() {
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-                new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Casual", null, "Verano"), // sin marca
-                new Prenda("Abrigo", "Abrigo largo", "Abrigos", "Beige", "Formal", "Zara", "Invierno")
+                new Prenda("Camiseta", "Camiseta basica", "Camiseta", "Blanco", "Casual", null, "Verano"), // sin marca
+                new Prenda("Abrigo", "Abrigo largo", "Abrigo/Cazadora", "Beige", "Formal", "Zara", "Invierno")
         );
         List<Prenda> resultado = gestor.filtrarCombinado(armario, Map.of("marca", "Zara"));
         assertEquals(1, resultado.size());
@@ -108,8 +108,8 @@ class GestorCategoriasTest {
     void combinadoSinFiltrosDevuelveTodas() {
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-                new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Casual", "Nike", "Verano"),
-                new Prenda("Vaqueros", "Vaqueros rectos", "Pantalones", "Azul", "Casual", "Levis", "Atemporal")
+                new Prenda("Camiseta", "Camiseta basica", "Camiseta", "Blanco", "Casual", "Nike", "Verano"),
+                new Prenda("Vaqueros", "Vaqueros rectos", "Pantalón", "Azul", "Casual", "Levis", "Atemporal")
         );
         List<Prenda> resultado = gestor.filtrarCombinado(armario, Map.of());
         assertEquals(2, resultado.size());
@@ -120,9 +120,9 @@ class GestorCategoriasTest {
     void combinadoSinCoincidenciasDevuelveVacio() {
         GestorCategorias gestor = new GestorCategorias();
         List<Prenda> armario = List.of(
-                new Prenda("Camiseta", "Camiseta basica", "Camisetas", "Blanco", "Casual", "Nike", "Verano")
+                new Prenda("Camiseta", "Camiseta basica", "Camiseta", "Blanco", "Casual", "Nike", "Verano")
         );
-        Map<String, String> filtros = Map.of("tipo", "Camisetas", "marca", "Zara");
+        Map<String, String> filtros = Map.of("tipo", "Camiseta", "marca", "Zara");
         List<Prenda> resultado = gestor.filtrarCombinado(armario, filtros);
         assertNotNull(resultado);
         assertTrue(resultado.isEmpty());

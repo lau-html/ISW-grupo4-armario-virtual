@@ -14,12 +14,12 @@ public class Prenda implements Serializable {
     // --- ATRIBUTOS ORIGINALES ---
     private int id;
     private String nombre;
-    private String tipo;
+    private TipoPrenda tipo = TipoPrenda.OTRO;
     private String color;
     private String descripcion;
-    private String estilo;
+    private EstiloPrenda estilo = EstiloPrenda.OTRO;
     private String marca;
-    private String temporada;
+    private Temporada temporada = Temporada.ATEMPORAL;
 
     // --- NUEVOS ATRIBUTOS SPRINT 2 ---
     private String rutaFoto;
@@ -38,12 +38,12 @@ public class Prenda implements Serializable {
     public Prenda(int id, String nombre, String tipo, String color, String descripcion, String estilo, String marca, String temporada) {
         this.id = id;
         this.nombre = nombre;
-        this.tipo = tipo;
+        this.tipo = TipoPrenda.desdeEtiqueta(tipo);
         this.color = color;
         this.descripcion = descripcion;
-        this.estilo = estilo;
+        this.estilo = EstiloPrenda.desdeEtiqueta(estilo);
         this.marca = marca;
-        this.temporada = temporada;
+        this.temporada = Temporada.desdeEtiqueta(temporada);
         this.categoriasPersonalizadas = new ArrayList<>();
         this.fechaCreacion = LocalDateTime.now();
     }
@@ -52,11 +52,11 @@ public class Prenda implements Serializable {
     public Prenda(String nombre, String descripcion, String tipo, String color, String estilo, String marca, String temporada) {
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.tipo = tipo;
+        this.tipo = TipoPrenda.desdeEtiqueta(tipo);
         this.color = color;
-        this.estilo = estilo; // Se añade el estilo que faltaba en la clase vieja
+        this.estilo = EstiloPrenda.desdeEtiqueta(estilo); // Se añade el estilo que faltaba en la clase vieja
         this.marca = marca;
-        this.temporada = temporada;
+        this.temporada = Temporada.desdeEtiqueta(temporada);
         this.categoriasPersonalizadas = new ArrayList<>();
         this.fechaCreacion = LocalDateTime.now();
     }
@@ -64,7 +64,7 @@ public class Prenda implements Serializable {
     // 4. Constructor corto para pruebas antiguas
     public Prenda(String nombre, String tipo, String color) {
         this.nombre = nombre;
-        this.tipo = tipo;
+        this.tipo = TipoPrenda.desdeEtiqueta(tipo);
         this.color = color;
         this.categoriasPersonalizadas = new ArrayList<>();
         this.fechaCreacion = LocalDateTime.now();
@@ -74,7 +74,7 @@ public class Prenda implements Serializable {
     public Prenda(int id, String nombre, String tipo, String color) {
         this.id = id;
         this.nombre = nombre;
-        this.tipo = tipo;
+        this.tipo = TipoPrenda.desdeEtiqueta(tipo);
         this.color = color;
         this.categoriasPersonalizadas = new ArrayList<>();
         this.fechaCreacion = LocalDateTime.now();
@@ -87,8 +87,8 @@ public class Prenda implements Serializable {
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getTipo() { return tipo; }
-    public void setTipo(String tipo) { this.tipo = tipo; }
+    public String getTipo() { return tipo.getEtiqueta(); }
+    public void setTipo(String tipo) { this.tipo = TipoPrenda.desdeEtiqueta(tipo); }
 
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
@@ -96,14 +96,25 @@ public class Prenda implements Serializable {
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-    public String getEstilo() { return estilo; }
-    public void setEstilo(String estilo) { this.estilo = estilo; } // Corregido el bug de la clase vieja
+    public String getEstilo() { return estilo.getEtiqueta(); }
+    public void setEstilo(String estilo) { this.estilo = EstiloPrenda.desdeEtiqueta(estilo); } // Corregido el bug de la clase vieja
 
     public String getMarca() { return marca; }
     public void setMarca(String marca) { this.marca = marca; }
 
-    public String getTemporada() { return temporada; }
-    public void setTemporada(String temporada) { this.temporada = temporada; }
+    public String getTemporada() { return temporada.getEtiqueta(); }
+    public void setTemporada(String temporada) { this.temporada = Temporada.desdeEtiqueta(temporada); }
+
+    public TipoPrenda getTipoPrenda() { return tipo; }
+    public void setTipoPrenda(TipoPrenda tipo) { this.tipo = tipo != null ? tipo : TipoPrenda.OTRO; }
+
+    public EstiloPrenda getEstiloPrenda() { return estilo; }
+    public void setEstiloPrenda(EstiloPrenda estilo) { this.estilo = estilo != null ? estilo : EstiloPrenda.OTRO; }
+
+    public Temporada getTemporadaPrenda() { return temporada; }
+    public void setTemporadaPrenda(Temporada temporada) { this.temporada = temporada != null ? temporada : Temporada.ATEMPORAL; }
+
+    public CategoriaPrenda getCategoria() { return tipo.getCategoria(); }
 
     // --- GETTERS Y SETTERS NUEVOS (SPRINT 2) ---
     public String getRutaFoto() { return rutaFoto; }
