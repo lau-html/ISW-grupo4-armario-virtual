@@ -41,6 +41,7 @@ import icai.dtc.isw.GestorOutfits;
 import icai.dtc.isw.GestorPrendas;
 import icai.dtc.isw.Outfit;
 import icai.dtc.isw.Prenda;
+import icai.dtc.isw.TipoPrenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
 
@@ -669,7 +670,8 @@ public class JVentana extends JFrame {
             return;
         }
         JTextField txtNombre = new JTextField(prenda.getNombre());
-        JTextField txtTipo = new JTextField(prenda.getTipo());
+        JComboBox<TipoPrenda> cbTipo = new JComboBox<>(TipoPrenda.values());
+        cbTipo.setSelectedItem(prenda.getTipoPrenda());
         JTextField txtColor = new JTextField(prenda.getColor());
         // Foto: se guarda en un array para poder cambiarla desde el botón
         String[] rutaFoto = {prenda.getRutaFoto()};
@@ -688,7 +690,7 @@ public class JVentana extends JFrame {
 
         JPanel formulario = new JPanel(new GridLayout(4, 2, 8, 8));
         formulario.add(new JLabel("Nombre:")); formulario.add(txtNombre);
-        formulario.add(new JLabel("Tipo:"));   formulario.add(txtTipo);
+        formulario.add(new JLabel("Tipo:"));   formulario.add(cbTipo);
         formulario.add(new JLabel("Color:"));  formulario.add(txtColor);
         formulario.add(new JLabel("Foto:"));   formulario.add(panelFoto);
 
@@ -697,7 +699,7 @@ public class JVentana extends JFrame {
         if (respuesta == JOptionPane.OK_OPTION) {
             // SPRINT 2: el cambio se guarda también en la base de datos
             boolean editada = gestorPrendas.editarPrendaGuardada(todasLasPrendas, prenda.getId(),
-                    txtNombre.getText().trim(), txtTipo.getText().trim(), txtColor.getText().trim());
+                    txtNombre.getText().trim(), ((TipoPrenda) cbTipo.getSelectedItem()).getEtiqueta(), txtColor.getText().trim());
             if (!editada) {
                 JOptionPane.showMessageDialog(this,
                         "No se ha podido guardar el cambio en la base de datos.",
