@@ -86,6 +86,11 @@ public class JVentana extends JFrame {
     private DefaultListModel<Outfit> modeloOutfits = new DefaultListModel<>();
     private JList<Outfit> listaOutfits = new JList<>(modeloOutfits);
 
+    // SPRINT 3 (Cristina): sección de outfits favoritos
+    private final List<Outfit> todosLosOutfits = new ArrayList<>(); // todos los outfits del usuario, sin filtrar
+    private boolean soloFavoritos = false; // true = la lista solo enseña los favoritos
+    private JButton btnFavoritosOutfits; // botón "Todos / ★ Favoritos" encima de la lista
+
     public JVentana() {
         super("dressB");
         setSize(700, 500);
@@ -281,7 +286,18 @@ public class JVentana extends JFrame {
 
         GestorOutfits gestor = new GestorOutfits();
         List<Outfit> guardados = gestor.cargarOutfitsUsuario(usuario.getId(), todasLasPrendas);
-        for (Outfit o : guardados) {
+        todosLosOutfits.clear();
+        todosLosOutfits.addAll(guardados);
+        mostrarOutfits();
+    }
+
+    // SPRINT 3 (Cristina): pinta en la lista todos los outfits o solo los favoritos, según el botón
+    private void mostrarOutfits() {
+        modeloOutfits.clear();
+        List<Outfit> aMostrar = soloFavoritos
+                ? new GestorOutfits().filtrarFavoritos(todosLosOutfits)
+                : todosLosOutfits;
+        for (Outfit o : aMostrar) {
             modeloOutfits.addElement(o);
         }
     }
@@ -375,7 +391,7 @@ public class JVentana extends JFrame {
                 panelFila.setBackground(isSelected ? ROSA : CREMA);
                 panelFila.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(235, 225, 218)));
 
-                String estrella = o.isFavorito() ? "⭐ " : "";
+                String estrella = o.isFavorito() ? "★ " : "☆ "; // SPRINT 3: clic en la estrella para marcar o desmarcar
                 JLabel lblTexto = new JLabel(estrella + o.toString());
                 lblTexto.setForeground(BURDEOS);
                 lblTexto.setFont(new Font("SansSerif", Font.PLAIN, 14));
@@ -416,6 +432,19 @@ public class JVentana extends JFrame {
                         return;
                     }
 
+                    // SPRINT 3 (Cristina): clic en la estrella (a la izquierda) para marcar o desmarcar como favorito
+                    if (e.getX() < 30 && e.getClickCount() == 1) {
+                        GestorOutfits gestor = new GestorOutfits();
+                        if (gestor.cambiarFavorito(outfitSeleccionado)) {
+                            mostrarOutfits(); // si estoy viendo solo favoritos y lo desmarco, desaparece de la lista
+                        } else {
+                            JOptionPane.showMessageDialog(JVentana.this,
+                                    "No se ha podido guardar el favorito en la base de datos.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                        return;
+                    }
+
                     // Doble clic: cargar el outfit en el formulario para EDITARLO
                     if (e.getClickCount() == 2) {
                         cargarOutfitParaEditar(outfitSeleccionado);
@@ -426,7 +455,7 @@ public class JVentana extends JFrame {
 
         JScrollPane scrollOutfits = new JScrollPane(listaOutfits);
         scrollOutfits.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(ROSA), "Mis Outfits (doble clic para editar)",
+                BorderFactory.createLineBorder(ROSA), "Mis Outfits (☆ marcar favorito · doble clic editar)",
                 javax.swing.border.TitledBorder.LEFT, javax.swing.border.TitledBorder.TOP,
                 new Font("SansSerif", Font.BOLD, 13), BURDEOS));
         scrollOutfits.getViewport().setBackground(CREMA);
@@ -435,7 +464,19 @@ public class JVentana extends JFrame {
         JPanel panelCentralDividido = new JPanel(new BorderLayout(15, 0));
         panelCentralDividido.setBackground(CREMA);
         panelCentralDividido.add(panelFormulario, BorderLayout.CENTER);
-        panelCentralDividido.add(scrollOutfits, BorderLayout.EAST);
+        // SPRINT 3 (Cristina): botón para ver todos los outfits o solo los favoritos, encima de la lista
+        btnFavoritosOutfits = crearBoton("Ver: Todos");
+        btnFavoritosOutfits.setToolTipText("Mostrar todos los outfits o solo los favoritos");
+        btnFavoritosOutfits.addActionListener(e -> {
+            soloFavoritos = !soloFavoritos;
+            btnFavoritosOutfits.setText(soloFavoritos ? "Ver: ★ Favoritos" : "Ver: Todos");
+            mostrarOutfits();
+        });
+        JPanel panelListaOutfits = new JPanel(new BorderLayout(0, 6));
+        panelListaOutfits.setBackground(CREMA);
+        panelListaOutfits.add(btnFavoritosOutfits, BorderLayout.NORTH);
+        panelListaOutfits.add(scrollOutfits, BorderLayout.CENTER);
+        panelCentralDividido.add(panelListaOutfits, BorderLayout.EAST);
         panel.add(panelCentralDividido, BorderLayout.CENTER);
 
         // Barra inferior: Guardar / Guardar Cambios + Cancelar edición
@@ -563,7 +604,7 @@ public class JVentana extends JFrame {
             cbSelectorAccesorios.addItem(p);
         }
     }
-       
+
 
     // se llama desde el detalle cuando cambian las categorias de una prenda o se crea una categoria nueva, le mando refrescar los filtrados y prendas visibles
     private void refrescarVista() {

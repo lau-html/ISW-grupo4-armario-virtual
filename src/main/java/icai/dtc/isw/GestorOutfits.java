@@ -72,33 +72,61 @@ public class GestorOutfits {
         }
     }
 
+    // SPRINT 3 (Cristina): devuelve solo los outfits marcados como favoritos, en el mismo orden.
+    // No usa la base de datos, trabaja con la lista que ya está cargada.
+    public List<Outfit> filtrarFavoritos(List<Outfit> outfits) {
+        List<Outfit> favoritos = new ArrayList<>();
+        if (outfits == null) {
+            return favoritos;
+        }
+        for (Outfit o : outfits) {
+            if (o != null && o.isFavorito()) {
+                favoritos.add(o);
+            }
+        }
+        return favoritos;
+    }
+
+
+    public boolean cambiarFavorito(Outfit outfit) {
+        if (outfit == null || outfit.getId() <= 0) {
+            return false;
+        }
+        boolean nuevoValor = !outfit.isFavorito();
+        if (dao.actualizarFavorito(outfit.getId(), outfit.getUsuarioId(), nuevoValor)) {
+            outfit.setFavorito(nuevoValor);
+            return true;
+        }
+        return false;
+    }
+
     // Método auxiliar para comprobar el tipo/categoría de la prenda
     private boolean esDeCategoria(Prenda prenda, String categoriaEsperada) {
         String tipo = prenda.getTipo();
         if (tipo == null) return false;
-        
+
         String t = tipo.trim().toLowerCase();
         switch (categoriaEsperada.toUpperCase()) {
             case "SUPERIOR":
-                return t.contains("arriba") || t.contains("superior") || 
-                       t.equals("camiseta") || t.equals("camisa") || t.equals("jersey") || 
-                       t.equals("sudadera") || t.equals("top") || t.equals("chaqueta") || t.equals("abrigo");
+                return t.contains("arriba") || t.contains("superior") ||
+                        t.equals("camiseta") || t.equals("camisa") || t.equals("jersey") ||
+                        t.equals("sudadera") || t.equals("top") || t.equals("chaqueta") || t.equals("abrigo");
             case "INFERIOR":
-                return t.contains("abajo") || t.contains("inferior") || 
-                       t.equals("pantalón") || t.equals("pantalon") || t.equals("falda") || 
-                       t.equals("vaqueros") || t.equals("short") || t.equals("bermudas");
+                return t.contains("abajo") || t.contains("inferior") ||
+                        t.equals("pantalón") || t.equals("pantalon") || t.equals("falda") ||
+                        t.equals("vaqueros") || t.equals("short") || t.equals("bermudas");
             case "CALZADO":
-                return t.contains("calzado") || 
-                       t.equals("zapatos") || t.equals("zapatillas") || t.equals("botas") || 
-                       t.equals("sandalias") || t.equals("tacones");
+                return t.contains("calzado") ||
+                        t.equals("zapatos") || t.equals("zapatillas") || t.equals("botas") ||
+                        t.equals("sandalias") || t.equals("tacones");
             case "ACCESORIO":
-                return t.contains("accesorio") || 
-                       t.equals("bolso") || t.equals("cinturón") || t.equals("cinturon") || 
-                       t.equals("gorra") || t.equals("sombrero") || t.equals("bufanda") || 
-                       t.equals("gafas") || t.equals("joyería") || t.equals("joyeria");
+                return t.contains("accesorio") ||
+                        t.equals("bolso") || t.equals("cinturón") || t.equals("cinturon") ||
+                        t.equals("gorra") || t.equals("sombrero") || t.equals("bufanda") ||
+                        t.equals("gafas") || t.equals("joyería") || t.equals("joyeria");
             default:
                 return false;
         }
-    
+
     }
 }

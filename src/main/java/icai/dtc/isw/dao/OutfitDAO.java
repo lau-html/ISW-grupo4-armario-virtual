@@ -172,4 +172,22 @@ public class OutfitDAO {
             return false;
         }
     }
+
+    // SPRINT 3 (Cristina): marca o desmarca un outfit como favorito sin volver a guardar sus prendas.
+    // Solo lo cambia si el outfit es de ese usuario. Devuelve true si se ha actualizado.
+    public boolean actualizarFavorito(int outfitId, int usuarioId, boolean favorito) {
+        String sql = "UPDATE outfit SET favorito = ? WHERE id = ? AND usuario_id = ?";
+        // La conexión no se cierra aquí: ConnectionDAO la comparte entre todas las consultas
+        Connection conn = ConnectionDAO.getInstance().getConnection();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setBoolean(1, favorito);
+            pstmt.setInt(2, outfitId);
+            pstmt.setInt(3, usuarioId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar el favorito del outfit " + outfitId);
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
