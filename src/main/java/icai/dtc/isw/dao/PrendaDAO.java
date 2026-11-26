@@ -129,19 +129,25 @@ public class PrendaDAO {
     }
 
     /**
-     * Guarda en la BD los cambios de una prenda (nombre, tipo y color).
+     * Guarda en la BD todos los atributos editables de una prenda
+     * (nombre, descripción, tipo, estilo, color, marca y temporada).
      * Solo la modifica si pertenece a ese usuario. Devuelve true si se ha actualizado.
      */
-    public boolean actualizarPrenda(int id, String nombre, String tipo, String color, String usuarioEmail) {
-        String sql = "UPDATE prenda SET nombre = ?, tipo = ?, color = ? WHERE id = ? AND usuario_email = ?";
+    public boolean actualizarPrenda(int id, Prenda datos, String usuarioEmail) {
+        String sql = "UPDATE prenda SET nombre = ?, descripcion = ?, tipo = ?, estilo = ?, color = ?, marca = ?, temporada = ? "
+                + "WHERE id = ? AND usuario_email = ?";
         Connection conn = ConnectionDAO.getInstance().getConnection();
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, nombre);
-            pstmt.setString(2, tipo);
-            pstmt.setString(3, color);
-            pstmt.setInt(4, id);
-            pstmt.setString(5, usuarioEmail);
+            pstmt.setString(1, datos.getNombre());
+            pstmt.setString(2, datos.getDescripcion());
+            pstmt.setString(3, datos.getTipo());
+            pstmt.setString(4, datos.getEstilo());
+            pstmt.setString(5, datos.getColor());
+            pstmt.setString(6, datos.getMarca());
+            pstmt.setString(7, datos.getTemporada());
+            pstmt.setInt(8, id);
+            pstmt.setString(9, usuarioEmail);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Error al actualizar la prenda " + id);

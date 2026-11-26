@@ -69,17 +69,34 @@ public class GestorPrendas { // SPRINT 1: EDITAR Y ELIMINAR PRENDAS
         return prendaDAO.guardarPrendaUsuario(prenda);
     }
 
-    /** Edita la prenda en la BD y, si va bien, también en la lista. Devuelve true si se ha guardado. */
-    public boolean editarPrendaGuardada(List<Prenda> prendas, int id, String nombre, String tipo, String color) {
+    public boolean aplicarCambios(List<Prenda> prendas, Prenda cambios) {
+        Prenda prenda = buscarPorId(prendas, cambios.getId());
+        if (prenda == null) {
+            return false;
+        }
+        prenda.setNombre(cambios.getNombre());
+        prenda.setDescripcion(cambios.getDescripcion());
+        prenda.setTipoPrenda(cambios.getTipoPrenda());
+        prenda.setEstiloPrenda(cambios.getEstiloPrenda());
+        prenda.setColor(cambios.getColor());
+        prenda.setMarca(cambios.getMarca());
+        prenda.setTemporadaPrenda(cambios.getTemporadaPrenda());
+        return true;
+    }
+
+    public boolean editarPrendaGuardada(List<Prenda> prendas, Prenda cambios) {
         if (!SesionUsuario.haySesion()) {
             System.out.println("No hay sesión iniciada: no se puede editar la prenda.");
             return false;
         }
-        String email = SesionUsuario.getUsuarioActual().getEmail();
-        if (!prendaDAO.actualizarPrenda(id, nombre, tipo, color, email)) {
+        if (buscarPorId(prendas, cambios.getId()) == null) {
             return false;
         }
-        return editarPrenda(prendas, id, nombre, tipo, color);
+        String email = SesionUsuario.getUsuarioActual().getEmail();
+        if (!prendaDAO.actualizarPrenda(cambios.getId(), cambios, email)) {
+            return false;
+        }
+        return aplicarCambios(prendas, cambios);
     }
 
     /** Borra la prenda de la BD y, si va bien, también de la lista. Devuelve true si se ha borrado. */
