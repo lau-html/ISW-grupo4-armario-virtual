@@ -6,9 +6,14 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +49,7 @@ import icai.dtc.isw.Prenda;
 import icai.dtc.isw.TipoPrenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
+
 
 // VENTANA PRINCIPAL DE dressB: se abre después de iniciar sesión.
 public class JVentana extends JFrame {
@@ -91,22 +97,53 @@ public class JVentana extends JFrame {
         UIManager.put("TabbedPane.focus", CREMA);    // sin recuadro de foco
 
         JTabbedPane pestanas = new JTabbedPane();
+        pestanas.setUI(new BasicTabbedPaneUI() { // creo una ui para poder ir cambiando sus metodos - los pongo como protected para q solo accedan los del mismo paquete accedan - UI
+            @Override
+            protected void installDefaults() { 
+                super.installDefaults(); //pongo defaults y luego cambio
+                tabInsets = new Insets(8, 18, 10, 18); // espacio alrededor del texto
+                selectedTabPadInsets = new Insets(0, 0, 0, 0); // quito que la pestaña activa se "levante" respecto al resto
+                contentBorderInsets = new Insets(0, 0, 0, 0); // sin marco del contenido
+            }
 
-        //PRUEBA, quitar el set ui si queremos volver a lo anterior
-        pestanas.setUI(new BasicTabbedPaneUI() {
-        @Override
-        protected void paintContentBorder(Graphics g, int colocacion, int seleccionada) {
-            // no dibujo el marco alrededor del contenido que no queda estetico
-        }
+            // los metodos de pintar los dejo vacios
+            @Override
+            protected void paintTabBackground(Graphics g, int tabPlacement, int tabIndex, int x, int y, int w, int h, boolean isSelected) {} // sin fondo
+
+            @Override
+            protected void paintTabBorder(Graphics g, int tabPlacement, int tabIndex, int x, int y, int w, int h, boolean isSelected) {} // sin borde
+
+            @Override
+            protected void paintFocusIndicator(Graphics g, int tabPlacement, Rectangle[] rects, int tabIndex, Rectangle iconRect, Rectangle textRect, boolean isSelected) {} // sin recuadro de foco
+
+            @Override
+            protected void paintContentBorder(Graphics g, int tabPlacement, int selectedIndex) {} // sin marco
+
+            @Override // metodo para dibujar las diferentes pestanas
+            protected void paintText(Graphics g, int tabPlacement, Font font, FontMetrics metrics, int tabIndex, String title, Rectangle textRect, boolean isSelected) {
+                Graphics2D g2 = (Graphics2D) g; // para poder suavizar los bordes, g2 da mas opciones
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // suavizado
+                g2.setFont(font); // usando la font creada en tema
+                if (isSelected) {
+                    g2.setColor(BURDEOS); // la letra de la pestaña activa en burdeos 
+                } else {
+                    g2.setColor(GRIS_TEXTO); // las demas pestañas en gris (mostrando no seleccionada)
+                }
+                g2.drawString(title, textRect.x, textRect.y + metrics.getAscent()); // escribo el nombre de la pestaña dejandole un poco de espacio
+                if (isSelected) {
+                    g2.setColor(ROSA);
+                    g2.fillRoundRect(textRect.x, textRect.y + textRect.height + 4, textRect.width, 3, 3, 3); // rayita rosa debajo para marcarlo
+                }
+            }
         });
 
         pestanas.setBackground(CREMA);
         pestanas.setForeground(BURDEOS);
-        pestanas.setFont(new Font("SansSerif", Font.BOLD, 13));
+        pestanas.setFont(Tema.getInstancia().fuenteTituloSec); // DM Sans normal, más fina que los botones // DM Sans en negrita desde Tema, tamaño 15, antes era la sansSerif
         pestanas.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0)); // separo las pestañas de la linea verde
-        pestanas.addTab("Mi armario", crearPanelArmario());
-        pestanas.addTab("Outfits", crearPanelOutfits());
-        pestanas.addTab("Perfil", crearPanelPerfil());
+        pestanas.addTab("MI ARMARIO", crearPanelArmario());
+        pestanas.addTab("OUTFITS", crearPanelOutfits());
+        pestanas.addTab("PERFIL", crearPanelPerfil());
         add(pestanas, BorderLayout.CENTER);
     }
 

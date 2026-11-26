@@ -4,8 +4,11 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.font.TextAttribute;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -23,18 +26,20 @@ public class Tema {
     private static Tema instanciaTema; // la unica instancia
     private static final Font FUENTE_NORMAL_DMSANS = cargarFuente("/DMSans_18pt-Medium.ttf");
     private static final Font FUENTE_BOLD_DMSANS = cargarFuente("/DMSans_18pt-Bold.ttf");
+    private static final Font FUENTE_GASOEK = cargarFuente("/GasoekOne-Regular.ttf"); // la del logo
 
-    // colores de la app
+    // colores de la app (ahora se leen de tema)
     public static final Color CREMA = new Color(251, 246, 241); // fondo
     public static final Color ROSA = new Color(220, 135, 202); // "dress" del logo y selección
     public static final Color BURDEOS = new Color(87, 6, 45); // "B" del logo, botones y títulos
     public static final Color LIMA = new Color(225, 236, 159); // detalles
     public static final Color GRIS_TEXTO = new Color(120, 110, 115); // textos secundarios
 
-    // fuentes de la app (letras normales)
+    // fuentes de la app (letras normales), son publicas para poder acceder desde fuera
     public final Font fuenteNormal = crearFuente(Font.PLAIN, 14);
     public final Font fuenteNegrita = crearFuente(Font.BOLD, 13);
-    public final Font fuenteTitulo = crearFuente(Font.BOLD, 16);
+    public final Font fuenteTitulo = crearFuenteTitulo(15); // Gasoek One a tamaño 15 para titulos
+    public final Font fuenteTituloSec = crearFuenteTituloSec(15);
 
     private Tema() {
         // constructor privado para que nadie cree otra instancia - Singleton
@@ -56,6 +61,17 @@ public class Tema {
             fuentePrincipal = FUENTE_NORMAL_DMSANS; // normal
         }
         return fuentePrincipal.deriveFont(Font.PLAIN, tamano); // el grosor ya lo da el archivo
+    }
+
+    public Font crearFuenteTitulo(float tamano) {
+        return FUENTE_GASOEK.deriveFont(Font.PLAIN, tamano);
+    }
+
+    public Font crearFuenteTituloSec(float tamano) {
+        Map<TextAttribute, Object> atributos = new HashMap<>(); // guardo ajustes extra a la fuente (le quiero meter separacion)
+        atributos.put(TextAttribute.TRACKING, 0.04); // separación entre letras (un 8% del tamaño)
+        return FUENTE_GASOEK.deriveFont(Font.PLAIN, tamano).deriveFont(atributos); // primero tamaño y luego separación
+
     }
 
     private static Font cargarFuente(String rutaFuente) {
