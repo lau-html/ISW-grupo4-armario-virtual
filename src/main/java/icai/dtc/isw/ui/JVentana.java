@@ -6,9 +6,14 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,18 +46,20 @@ import icai.dtc.isw.GestorOutfits;
 import icai.dtc.isw.GestorPrendas;
 import icai.dtc.isw.Outfit;
 import icai.dtc.isw.Prenda;
+import icai.dtc.isw.TipoPrenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
+
 
 // VENTANA PRINCIPAL DE dressB: se abre después de iniciar sesión.
 public class JVentana extends JFrame {
 
-    // colores de la app
-    public static final Color CREMA = new Color(251, 246, 241);   // fondo
-    public static final Color ROSA = new Color(220, 135, 202);    // "dress" del logo y selección
-    public static final Color BURDEOS = new Color(87, 6, 45);     // "B" del logo, botones y títulos
-    public static final Color LIMA = new Color(225, 236, 159);    // detalles
-    public static final Color GRIS_TEXTO = new Color(120, 110, 115); // textos secundarios
+    // colores de la app (ahora se leen de Tema)
+    public static final Color CREMA = Tema.CREMA; // fondo
+    public static final Color ROSA = Tema.ROSA; // "dress" del logo y selección
+    public static final Color BURDEOS = Tema.BURDEOS; // "B" del logo, botones y títulos
+    public static final Color LIMA = Tema.LIMA; // detalles
+    public static final Color GRIS_TEXTO = Tema.GRIS_TEXTO; // textos secundarios
 
     private JPanel panelPrendas; // zona central de "Mi armario" donde se muestran las prendas
     private JList<Prenda> listaPrendas; // lista visible (para saber qué prenda está seleccionada)
@@ -90,22 +97,53 @@ public class JVentana extends JFrame {
         UIManager.put("TabbedPane.focus", CREMA);    // sin recuadro de foco
 
         JTabbedPane pestanas = new JTabbedPane();
+        pestanas.setUI(new BasicTabbedPaneUI() { // creo una ui para poder ir cambiando sus metodos - los pongo como protected para q solo accedan los del mismo paquete accedan - UI
+            @Override
+            protected void installDefaults() { 
+                super.installDefaults(); //pongo defaults y luego cambio
+                tabInsets = new Insets(8, 18, 10, 18); // espacio alrededor del texto
+                selectedTabPadInsets = new Insets(0, 0, 0, 0); // quito que la pestaña activa se "levante" respecto al resto
+                contentBorderInsets = new Insets(0, 0, 0, 0); // sin marco del contenido
+            }
 
-        //PRUEBA, quitar el set ui si queremos volver a lo anterior
-        pestanas.setUI(new BasicTabbedPaneUI() {
-        @Override
-        protected void paintContentBorder(Graphics g, int colocacion, int seleccionada) {
-            // no dibujo el marco alrededor del contenido que no queda estetico
-        }
+            // los metodos de pintar los dejo vacios
+            @Override
+            protected void paintTabBackground(Graphics g, int tabPlacement, int tabIndex, int x, int y, int w, int h, boolean isSelected) {} // sin fondo
+
+            @Override
+            protected void paintTabBorder(Graphics g, int tabPlacement, int tabIndex, int x, int y, int w, int h, boolean isSelected) {} // sin borde
+
+            @Override
+            protected void paintFocusIndicator(Graphics g, int tabPlacement, Rectangle[] rects, int tabIndex, Rectangle iconRect, Rectangle textRect, boolean isSelected) {} // sin recuadro de foco
+
+            @Override
+            protected void paintContentBorder(Graphics g, int tabPlacement, int selectedIndex) {} // sin marco
+
+            @Override // metodo para dibujar las diferentes pestanas
+            protected void paintText(Graphics g, int tabPlacement, Font font, FontMetrics metrics, int tabIndex, String title, Rectangle textRect, boolean isSelected) {
+                Graphics2D g2 = (Graphics2D) g; // para poder suavizar los bordes, g2 da mas opciones
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // suavizado
+                g2.setFont(font); // usando la font creada en tema
+                if (isSelected) {
+                    g2.setColor(BURDEOS); // la letra de la pestaña activa en burdeos 
+                } else {
+                    g2.setColor(GRIS_TEXTO); // las demas pestañas en gris (mostrando no seleccionada)
+                }
+                g2.drawString(title, textRect.x, textRect.y + metrics.getAscent()); // escribo el nombre de la pestaña dejandole un poco de espacio
+                if (isSelected) {
+                    g2.setColor(ROSA);
+                    g2.fillRoundRect(textRect.x, textRect.y + textRect.height + 4, textRect.width, 3, 3, 3); // rayita rosa debajo para marcarlo
+                }
+            }
         });
 
         pestanas.setBackground(CREMA);
         pestanas.setForeground(BURDEOS);
-        pestanas.setFont(new Font("SansSerif", Font.BOLD, 13));
+        pestanas.setFont(Tema.getInstancia().fuenteTituloSec); // DM Sans normal, más fina que los botones // DM Sans en negrita desde Tema, tamaño 15, antes era la sansSerif
         pestanas.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0)); // separo las pestañas de la linea verde
-        pestanas.addTab("Mi armario", crearPanelArmario());
-        pestanas.addTab("Outfits", crearPanelOutfits());
-        pestanas.addTab("Perfil", crearPanelPerfil());
+        pestanas.addTab("MI ARMARIO", crearPanelArmario());
+        pestanas.addTab("OUTFITS", crearPanelOutfits());
+        pestanas.addTab("PERFIL", crearPanelPerfil());
         add(pestanas, BorderLayout.CENTER);
     }
 
@@ -276,7 +314,7 @@ public class JVentana extends JFrame {
         JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT));
         barra.setBackground(CREMA);
         JLabel lblTitulo = new JLabel("Diseña tu outfit");
-        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 16));
+        lblTitulo.setFont(Tema.getInstancia().crearFuente(Font.BOLD, 16));
         lblTitulo.setForeground(BURDEOS);
         barra.add(lblTitulo);
         panel.add(barra, BorderLayout.NORTH);
@@ -319,7 +357,7 @@ public class JVentana extends JFrame {
 
                 JLabel lblTexto = new JLabel(value.toString());
                 lblTexto.setForeground(BURDEOS);
-                lblTexto.setFont(new Font("SansSerif", Font.PLAIN, 14));
+                lblTexto.setFont(Tema.getInstancia().fuenteNormal);
                 lblTexto.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
                 JLabel lblPapelera = new JLabel("🗑️"); // Emoticono de papelera
@@ -370,7 +408,7 @@ public class JVentana extends JFrame {
         scrollOutfits.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(ROSA), "Mis Outfits Guardados",
                 javax.swing.border.TitledBorder.LEFT, javax.swing.border.TitledBorder.TOP,
-                new Font("SansSerif", Font.BOLD, 14), BURDEOS));
+                Tema.getInstancia().crearFuente(Font.BOLD, 14), BURDEOS));
         scrollOutfits.getViewport().setBackground(CREMA);
         scrollOutfits.setPreferredSize(new java.awt.Dimension(250, 0)); // Anchura fija mínima para que no se aplaste
 
@@ -563,7 +601,7 @@ public class JVentana extends JFrame {
                 textoVacio = "Ninguna prenda cumple los filtros activos. Prueba a quitar alguno.";
             }
             JLabel lblVacio = new JLabel(textoVacio, SwingConstants.CENTER);
-            lblVacio.setFont(new Font("SansSerif", Font.ITALIC, 14));
+            lblVacio.setFont(Tema.getInstancia().fuenteNormal);
             lblVacio.setForeground(GRIS_TEXTO);
             panelPrendas.add(lblVacio, BorderLayout.CENTER);
         } else {
@@ -572,7 +610,7 @@ public class JVentana extends JFrame {
                 modelo.addElement(prenda);
             }
             JList<Prenda> lista = new JList<>(modelo);
-            lista.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            lista.setFont(Tema.getInstancia().fuenteNormal);
             lista.setFixedCellHeight(36); // filas un poco mas altas
             lista.setBackground(CREMA); // fondo beige
             lista.setForeground(BURDEOS); // texto burdeos
@@ -669,7 +707,8 @@ public class JVentana extends JFrame {
             return;
         }
         JTextField txtNombre = new JTextField(prenda.getNombre());
-        JTextField txtTipo = new JTextField(prenda.getTipo());
+        JComboBox<TipoPrenda> cbTipo = new JComboBox<>(TipoPrenda.values());
+        cbTipo.setSelectedItem(prenda.getTipoPrenda());
         JTextField txtColor = new JTextField(prenda.getColor());
         // Foto: se guarda en un array para poder cambiarla desde el botón
         String[] rutaFoto = {prenda.getRutaFoto()};
@@ -688,7 +727,7 @@ public class JVentana extends JFrame {
 
         JPanel formulario = new JPanel(new GridLayout(4, 2, 8, 8));
         formulario.add(new JLabel("Nombre:")); formulario.add(txtNombre);
-        formulario.add(new JLabel("Tipo:"));   formulario.add(txtTipo);
+        formulario.add(new JLabel("Tipo:"));   formulario.add(cbTipo);
         formulario.add(new JLabel("Color:"));  formulario.add(txtColor);
         formulario.add(new JLabel("Foto:"));   formulario.add(panelFoto);
 
@@ -697,7 +736,7 @@ public class JVentana extends JFrame {
         if (respuesta == JOptionPane.OK_OPTION) {
             // SPRINT 2: el cambio se guarda también en la base de datos
             boolean editada = gestorPrendas.editarPrendaGuardada(todasLasPrendas, prenda.getId(),
-                    txtNombre.getText().trim(), txtTipo.getText().trim(), txtColor.getText().trim());
+                    txtNombre.getText().trim(), ((TipoPrenda) cbTipo.getSelectedItem()).getEtiqueta(), txtColor.getText().trim());
             if (!editada) {
                 JOptionPane.showMessageDialog(this,
                         "No se ha podido guardar el cambio en la base de datos.",
@@ -720,7 +759,7 @@ public class JVentana extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
         JLabel lblTitulo = new JLabel("Mi perfil");
-        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 20));
+        lblTitulo.setFont(Tema.getInstancia().crearFuente(Font.BOLD, 20));;
         lblTitulo.setForeground(BURDEOS);
 
         JLabel lblEmail = new JLabel("Correo: " + obtenerEmailUsuario());
@@ -740,18 +779,9 @@ public class JVentana extends JFrame {
         return panel;
     }
 
-    // Crea un botón con el estilo de dressB (fondo burdeos y letra crema)
+    // Crea un botón con el estilo de dressB (lo hace Tema, para que todos los botones sean iguales)
     private JButton crearBoton(String texto) {
-        JButton boton = new JButton(texto);
-        boton.setBackground(BURDEOS);
-        boton.setForeground(CREMA);
-        boton.setFont(new Font("SansSerif", Font.BOLD, 13));
-        boton.setFocusPainted(false);
-        boton.setBorderPainted(false);
-        boton.setOpaque(true);
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        boton.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        return boton;
+        return Tema.getInstancia().crearBoton(texto); // le pido el botón a Tema
     }
 
     // Devuelve el correo del usuario que ha iniciado sesión

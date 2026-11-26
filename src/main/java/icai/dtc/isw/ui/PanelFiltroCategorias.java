@@ -2,7 +2,6 @@ package icai.dtc.isw.ui;
 
 import java.awt.Color;
 import java.awt.Cursor;
-import java.awt.Font;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +51,7 @@ public class PanelFiltroCategorias extends JPanel {
         // ajusto la estetica del boton al estilo de  dressB, igual que los demas botones de la ventana
         botonCategorias.setBackground(BURDEOS); // fondo burdeos como los demas botones
         botonCategorias.setForeground(CREMA);
-        botonCategorias.setFont(new Font("SansSerif", Font.BOLD, 13));
+        botonCategorias.setFont(Tema.getInstancia().fuenteNegrita);
         botonCategorias.setFocusPainted(false); // quito el recuadro de foco
         botonCategorias.setBorderPainted(false);
         botonCategorias.setOpaque(true); // se pinta el fondo del boton
@@ -91,6 +90,20 @@ public class PanelFiltroCategorias extends JPanel {
             submenuPers.add(opcion);
         }
         anadirOpcionQuitar(submenuPers, "categoriaPersonalizada");
+        // opcion para borrar una categoria personalizada
+        submenuPers.addSeparator();
+        JMenuItem borrar = new JMenuItem("Borrar categoría...");
+        borrar.addActionListener(e -> {
+            if (DialogoBorrarCategoria.mostrar(this, gestorPers, prendas)) {
+                // si estaba filtrando por la categoria borrada, quito ese filtro
+                String filtroCat = filtrosActivos.get("categoriaPersonalizada");
+                if (filtroCat != null && !gestorPers.getCategorias().contains(filtroCat)) {
+                    filtrosActivos.remove("categoriaPersonalizada");
+                }
+                reaplicar();
+            }
+        });
+        submenuPers.add(borrar);
         menuCategorias.add(submenuPers);
 
         if (!filtrosActivos.isEmpty()) { // opcion para limpiar todos los filtros de golpe
