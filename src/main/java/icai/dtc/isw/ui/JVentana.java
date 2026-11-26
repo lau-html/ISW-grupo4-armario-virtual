@@ -54,12 +54,12 @@ import icai.dtc.isw.domain.Usuario;
 // VENTANA PRINCIPAL DE dressB: se abre después de iniciar sesión.
 public class JVentana extends JFrame {
 
-    // colores de la app
-    public static final Color CREMA = new Color(251, 246, 241);   // fondo
-    public static final Color ROSA = new Color(220, 135, 202);    // "dress" del logo y selección
-    public static final Color BURDEOS = new Color(87, 6, 45);     // "B" del logo, botones y títulos
-    public static final Color LIMA = new Color(225, 236, 159);    // detalles
-    public static final Color GRIS_TEXTO = new Color(120, 110, 115); // textos secundarios
+    // colores de la app (ahora se leen de Tema)
+    public static final Color CREMA = Tema.CREMA; // fondo
+    public static final Color ROSA = Tema.ROSA; // "dress" del logo y selección
+    public static final Color BURDEOS = Tema.BURDEOS; // "B" del logo, botones y títulos
+    public static final Color LIMA = Tema.LIMA; // detalles
+    public static final Color GRIS_TEXTO = Tema.GRIS_TEXTO; // textos secundarios
 
     private JPanel panelPrendas; // zona central de "Mi armario" donde se muestran las prendas
     private JList<Prenda> listaPrendas; // lista visible (para saber qué prenda está seleccionada)
@@ -314,7 +314,7 @@ public class JVentana extends JFrame {
         JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT));
         barra.setBackground(CREMA);
         JLabel lblTitulo = new JLabel("Diseña tu outfit");
-        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 16));
+        lblTitulo.setFont(Tema.getInstancia().crearFuente(Font.BOLD, 16));
         lblTitulo.setForeground(BURDEOS);
         barra.add(lblTitulo);
         panel.add(barra, BorderLayout.NORTH);
@@ -357,7 +357,7 @@ public class JVentana extends JFrame {
 
                 JLabel lblTexto = new JLabel(value.toString());
                 lblTexto.setForeground(BURDEOS);
-                lblTexto.setFont(new Font("SansSerif", Font.PLAIN, 14));
+                lblTexto.setFont(Tema.getInstancia().fuenteNormal);
                 lblTexto.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
                 JLabel lblPapelera = new JLabel("🗑️"); // Emoticono de papelera
@@ -408,7 +408,7 @@ public class JVentana extends JFrame {
         scrollOutfits.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createLineBorder(ROSA), "Mis Outfits Guardados",
                 javax.swing.border.TitledBorder.LEFT, javax.swing.border.TitledBorder.TOP,
-                new Font("SansSerif", Font.BOLD, 14), BURDEOS));
+                Tema.getInstancia().crearFuente(Font.BOLD, 14), BURDEOS));
         scrollOutfits.getViewport().setBackground(CREMA);
         scrollOutfits.setPreferredSize(new java.awt.Dimension(250, 0)); // Anchura fija mínima para que no se aplaste
 
@@ -601,7 +601,7 @@ public class JVentana extends JFrame {
                 textoVacio = "Ninguna prenda cumple los filtros activos. Prueba a quitar alguno.";
             }
             JLabel lblVacio = new JLabel(textoVacio, SwingConstants.CENTER);
-            lblVacio.setFont(new Font("SansSerif", Font.ITALIC, 14));
+            lblVacio.setFont(Tema.getInstancia().fuenteNormal);
             lblVacio.setForeground(GRIS_TEXTO);
             panelPrendas.add(lblVacio, BorderLayout.CENTER);
         } else {
@@ -610,7 +610,7 @@ public class JVentana extends JFrame {
                 modelo.addElement(prenda);
             }
             JList<Prenda> lista = new JList<>(modelo);
-            lista.setFont(new Font("SansSerif", Font.PLAIN, 14));
+            lista.setFont(Tema.getInstancia().fuenteNormal);
             lista.setFixedCellHeight(36); // filas un poco mas altas
             lista.setBackground(CREMA); // fondo beige
             lista.setForeground(BURDEOS); // texto burdeos
@@ -759,7 +759,7 @@ public class JVentana extends JFrame {
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
         JLabel lblTitulo = new JLabel("Mi perfil");
-        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 20));
+        lblTitulo.setFont(Tema.getInstancia().crearFuente(Font.BOLD, 20));;
         lblTitulo.setForeground(BURDEOS);
 
         JLabel lblEmail = new JLabel("Correo: " + obtenerEmailUsuario());
@@ -779,18 +779,9 @@ public class JVentana extends JFrame {
         return panel;
     }
 
-    // Crea un botón con el estilo de dressB (fondo burdeos y letra crema)
+    // Crea un botón con el estilo de dressB (lo hace Tema, para que todos los botones sean iguales)
     private JButton crearBoton(String texto) {
-        JButton boton = new JButton(texto);
-        boton.setBackground(BURDEOS);
-        boton.setForeground(CREMA);
-        boton.setFont(new Font("SansSerif", Font.BOLD, 13));
-        boton.setFocusPainted(false);
-        boton.setBorderPainted(false);
-        boton.setOpaque(true);
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        boton.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
-        return boton;
+        return Tema.getInstancia().crearBoton(texto); // le pido el botón a Tema
     }
 
     // Devuelve el correo del usuario que ha iniciado sesión

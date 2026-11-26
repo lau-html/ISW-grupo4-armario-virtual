@@ -28,7 +28,7 @@ public class Tema {
     private static final Font FUENTE_BOLD_DMSANS = cargarFuente("/DMSans_18pt-Bold.ttf");
     private static final Font FUENTE_GASOEK = cargarFuente("/GasoekOne-Regular.ttf"); // la del logo
 
-    // colores de la app (ahora se leen de tema)
+    // colores de la app 
     public static final Color CREMA = new Color(251, 246, 241); // fondo
     public static final Color ROSA = new Color(220, 135, 202); // "dress" del logo y selección
     public static final Color BURDEOS = new Color(87, 6, 45); // "B" del logo, botones y títulos
@@ -69,7 +69,7 @@ public class Tema {
 
     public Font crearFuenteTituloSec(float tamano) {
         Map<TextAttribute, Object> atributos = new HashMap<>(); // guardo ajustes extra a la fuente (le quiero meter separacion)
-        atributos.put(TextAttribute.TRACKING, 0.04); // separación entre letras (un 8% del tamaño)
+        atributos.put(TextAttribute.TRACKING, 0.04); // separación entre letras (un 4% del tamaño)
         return FUENTE_GASOEK.deriveFont(Font.PLAIN, tamano).deriveFont(atributos); // primero tamaño y luego separación
 
     }
