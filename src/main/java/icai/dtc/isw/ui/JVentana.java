@@ -36,11 +36,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 
+import icai.dtc.isw.EstiloPrenda;
 import icai.dtc.isw.GestorCategoriasPers;
 import icai.dtc.isw.GestorOutfits;
 import icai.dtc.isw.GestorPrendas;
 import icai.dtc.isw.Outfit;
 import icai.dtc.isw.Prenda;
+import icai.dtc.isw.Temporada;
 import icai.dtc.isw.TipoPrenda;
 import icai.dtc.isw.VisualizarNumPrendas;
 import icai.dtc.isw.domain.Usuario;
@@ -724,16 +726,27 @@ public class JVentana extends JFrame {
         }
     }
 
-    // Permite cambiar el nombre, el tipo y el color y la foto de la prenda seleccionada
+    public List<String> getCategoriasPersonalizadas() {
+        return gestorCategoriasPers.getCategoriasBorrables();
+    }
+
     private void editarPrendaSeleccionada() {
         Prenda prenda = obtenerPrendaSeleccionada();
         if (prenda == null) {
             return;
         }
         JTextField txtNombre = new JTextField(prenda.getNombre());
+        JTextField txtDescripcion = new JTextField(prenda.getDescripcion());
         JComboBox<TipoPrenda> cbTipo = new JComboBox<>(TipoPrenda.values());
         cbTipo.setSelectedItem(prenda.getTipoPrenda());
+        JComboBox<EstiloPrenda> cbEstilo = new JComboBox<>(EstiloPrenda.values());
+        cbEstilo.setSelectedItem(prenda.getEstiloPrenda());
         JTextField txtColor = new JTextField(prenda.getColor());
+        JTextField txtMarca = new JTextField(prenda.getMarca());
+        JComboBox<Temporada> cbTemporada = new JComboBox<>(Temporada.values());
+        cbTemporada.setSelectedItem(prenda.getTemporadaPrenda());
+        SelectorCategorias selectorCategorias = new SelectorCategorias(
+                getCategoriasPersonalizadas(), prenda.getCategoriasPersonalizadas());
         // Foto: se guarda en un array para poder cambiarla desde el botón
         String[] rutaFoto = {prenda.getRutaFoto()};
         JLabel lblFoto = new JLabel(SelectorFoto.nombreArchivo(rutaFoto[0]));
@@ -749,18 +762,43 @@ public class JVentana extends JFrame {
         panelFoto.add(btnFoto, BorderLayout.WEST);
         panelFoto.add(lblFoto, BorderLayout.CENTER);
 
-        JPanel formulario = new JPanel(new GridLayout(4, 2, 8, 8));
-        formulario.add(new JLabel("Nombre:")); formulario.add(txtNombre);
-        formulario.add(new JLabel("Tipo:"));   formulario.add(cbTipo);
-        formulario.add(new JLabel("Color:"));  formulario.add(txtColor);
-        formulario.add(new JLabel("Foto:"));   formulario.add(panelFoto);
+        JPanel campos = new JPanel(new GridLayout(8, 2, 8, 8));
+        campos.add(new JLabel("Nombre:"));      campos.add(txtNombre);
+        campos.add(new JLabel("Descripción:")); campos.add(txtDescripcion);
+        campos.add(new JLabel("Tipo:"));        campos.add(cbTipo);
+        campos.add(new JLabel("Estilo:"));      campos.add(cbEstilo);
+        campos.add(new JLabel("Color:"));       campos.add(txtColor);
+        campos.add(new JLabel("Marca:"));       campos.add(txtMarca);
+        campos.add(new JLabel("Temporada:"));   campos.add(cbTemporada);
+        campos.add(new JLabel("Foto:"));        campos.add(panelFoto);
+
+        JPanel panelCategorias = new JPanel(new BorderLayout(8, 0));
+        panelCategorias.add(new JLabel("Categorías:"), BorderLayout.WEST);
+        panelCategorias.add(selectorCategorias, BorderLayout.CENTER);
+
+        JPanel formulario = new JPanel(new BorderLayout(0, 8));
+        formulario.add(campos, BorderLayout.CENTER);
+        formulario.add(panelCategorias, BorderLayout.SOUTH);
 
         int respuesta = JOptionPane.showConfirmDialog(this, formulario,
                 "Editar prenda", JOptionPane.OK_CANCEL_OPTION);
         if (respuesta == JOptionPane.OK_OPTION) {
+            if (txtNombre.getText().trim().isEmpty() || txtColor.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "El nombre y el color son obligatorios",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Prenda cambios = new Prenda();
+            cambios.setId(prenda.getId());
+            cambios.setNombre(txtNombre.getText().trim());
+            cambios.setDescripcion(txtDescripcion.getText().trim());
+            cambios.setTipoPrenda((TipoPrenda) cbTipo.getSelectedItem());
+            cambios.setEstiloPrenda((EstiloPrenda) cbEstilo.getSelectedItem());
+            cambios.setColor(txtColor.getText().trim());
+            cambios.setMarca(txtMarca.getText().trim());
+            cambios.setTemporadaPrenda((Temporada) cbTemporada.getSelectedItem());
             // SPRINT 2: el cambio se guarda también en la base de datos
-            boolean editada = gestorPrendas.editarPrendaGuardada(todasLasPrendas, prenda.getId(),
-                    txtNombre.getText().trim(), ((TipoPrenda) cbTipo.getSelectedItem()).getEtiqueta(), txtColor.getText().trim());
+            boolean editada = gestorPrendas.editarPrendaGuardada(todasLasPrendas, cambios);
             if (!editada) {
                 JOptionPane.showMessageDialog(this,
                         "No se ha podido guardar el cambio en la base de datos.",
@@ -769,6 +807,9 @@ public class JVentana extends JFrame {
             }
             prenda.setRutaFoto(rutaFoto[0]);
             gestorPrendas.guardarFoto(prenda);
+            prenda.setCategoriasPersonalizadas(new ArrayList<>(selectorCategorias.getSeleccionadas()));
+            gestorCategoriasPers.marcarFavorito(prenda, prenda.isEsFavorito());
+            gestorPrendas.guardarCategoriasYFavorito(prenda);
             mostrarPrendas(todasLasPrendas); // refrescar la lista
             actualizarDesplegables();        // refrescar desplegables
             panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la prenda editada
