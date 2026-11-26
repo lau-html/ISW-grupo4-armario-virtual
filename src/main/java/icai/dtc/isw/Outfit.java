@@ -13,30 +13,36 @@ public class Outfit implements Serializable {
     private int id;
     private String nombre;
     private List<Prenda> prendas;
-
-    // Atributos añadidos del Sprint 2
-    private boolean esFavorito;
+    private int usuarioId;
+    private boolean favorito;
 
     // Constructores
     public Outfit() {
         this.prendas = new ArrayList<>();
-        this.esFavorito = false;
+        this.favorito = false;
     }
 
-    public Outfit(String nombre, List<Prenda> prendas) {
+    public Outfit(String nombre, List<Prenda> prendas, int usuarioId, boolean favorito) {
         this.nombre = nombre;
         this.prendas = prendas != null ? prendas : new ArrayList<>();
-        this.esFavorito = false;
+        this.usuarioId = usuarioId;
+        this.favorito = favorito;
     }
 
-    public Outfit(int id, String nombre, List<Prenda> prendas) {
+    public Outfit(int id, String nombre, List<Prenda> prendas, int usuarioId, boolean favorito) {
         this.id = id;
         this.nombre = nombre;
         this.prendas = prendas != null ? prendas : new ArrayList<>();
-        this.esFavorito = false;
+        this.usuarioId = usuarioId;
+        this.favorito = favorito;
     }
 
-    // Getters y Setters principales
+    // Constructor antiguo mantenido por compatibilidad si algún test o clase lo usa
+    public Outfit(int id, String nombre, List<Prenda> prendas) {
+        this(id, nombre, prendas, 0, false);
+    }
+
+    // Getters y Setters
     public int getId() {
         return id;
     }
@@ -61,13 +67,20 @@ public class Outfit implements Serializable {
         this.prendas = prendas;
     }
 
-    // Getters y Setters de favoritos
+    public int getUsuarioId() {
+        return usuarioId;
+    }
+
+    public void setUsuarioId(int usuarioId) {
+        this.usuarioId = usuarioId;
+    }
+
     public boolean isFavorito() {
-        return esFavorito;
+        return favorito;
     }
 
     public void setFavorito(boolean favorito) {
-        this.esFavorito = favorito;
+        this.favorito = favorito;
     }
 
     @Override
