@@ -48,7 +48,7 @@ public class Prenda implements Serializable {
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    // 3. ¡RESCATADO Y ACTUALIZADO! Constructor para BBDD (SIN ID, lo genera SQL automáticamente)
+    // 3. Constructor para BBDD (SIN ID, lo genera SQL automáticamente)
     public Prenda(String nombre, String descripcion, String tipo, String color, String estilo, String marca, String temporada) {
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -97,7 +97,7 @@ public class Prenda implements Serializable {
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
     public String getEstilo() { return estilo.getEtiqueta(); }
-    public void setEstilo(String estilo) { this.estilo = EstiloPrenda.desdeEtiqueta(estilo); } // Corregido el bug de la clase vieja
+    public void setEstilo(String estilo) { this.estilo = EstiloPrenda.desdeEtiqueta(estilo); }
 
     public String getMarca() { return marca; }
     public void setMarca(String marca) { this.marca = marca; }
