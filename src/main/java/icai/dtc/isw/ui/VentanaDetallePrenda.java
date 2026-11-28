@@ -58,15 +58,18 @@ public class VentanaDetallePrenda extends JDialog {
         setLocationRelativeTo(null);
         setModal(true);
         setLayout(new BorderLayout(15, 15));
+        getContentPane().setBackground(Tema.CREMA); // fondo crema
 
         // 1. ZONA SUPERIOR: Botón de Favoritos
         // Incluye el botón de favoritos con forma de corazón para marcar y desmarcar la prenda.
-        JPanel panelSuperior = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel panelSuperior = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12,12)); // 12 px de hueco (aire) alrededor
+        panelSuperior.setBackground(Tema.CREMA);
         btnFavorito = new JButton();
         btnFavorito.setFont(new Font("SansSerif", Font.BOLD, 24));
         btnFavorito.setFocusPainted(false);
         btnFavorito.setContentAreaFilled(false);
         btnFavorito.setBorderPainted(false);
+        btnFavorito.setBorder(BorderFactory.createEmptyBorder(0, 4, 0, 4)); // sin hueco para alinear con boton
         btnFavorito.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         actualizarAspectoCorazon();
@@ -87,10 +90,7 @@ public class VentanaDetallePrenda extends JDialog {
         });
 
         // boton de categorias personalizadas, permite abrir un submenu para asignar/quitar las de esta prenda y para crear nuevas
-        btnCategorias = new JButton("Categorías");
-        btnCategorias.setFont(new Font("SansSerif", Font.BOLD, 13));
-        btnCategorias.setFocusPainted(false);
-        btnCategorias.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCategorias = Tema.getInstancia().crearBoton("Categorías"); // boton burdeos de Tema
         btnCategorias.addActionListener(e -> {
             rellenarMenuCategorias(); // lo relleno justo al abrir para que salgan las categorias y cambios de ahora
             menuCategorias.show(btnCategorias, 0, btnCategorias.getHeight());
@@ -109,6 +109,7 @@ public class VentanaDetallePrenda extends JDialog {
         // 3. ZONA INFERIOR: Toda la información que antes salía en el listado principal
         JPanel panelInfo = new JPanel(new GridLayout(0, 1, 5, 5));
         panelInfo.setBorder(BorderFactory.createEmptyBorder(10, 25, 20, 25));
+        panelInfo.setBackground(Tema.CREMA);
 
         panelInfo.add(crearEtiquetaDato("Nombre: ", p.getNombre()));
         panelInfo.add(crearEtiquetaDato("Tipo: ", p.getTipo()));
@@ -123,7 +124,8 @@ public class VentanaDetallePrenda extends JDialog {
 
     private JLabel crearEtiquetaDato(String titulo, String valor) {
         JLabel label = new JLabel("<html><b>" + titulo + "</b>" + (valor != null ? valor : "No especificado") + "</html>");
-        label.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        label.setFont(Tema.getInstancia().fuenteNormal); // letra de Tema
+        label.setForeground(Tema.BURDEOS); // texto burdeos
         return label;
     }
 
@@ -180,7 +182,7 @@ public class VentanaDetallePrenda extends JDialog {
 
         JLabel lblMensaje = new JLabel(mensaje, SwingConstants.CENTER);
         lblMensaje.setForeground(new Color(251, 246, 241)); // Color CREMA para el texto
-        lblMensaje.setFont(new Font("SansSerif", Font.BOLD, 14));
+        lblMensaje.setFont(Tema.getInstancia().fuenteNegrita); // letra de Tema
 
         panelRedondeado.add(lblMensaje, BorderLayout.CENTER);
         dialogMensaje.setContentPane(panelRedondeado);
