@@ -128,13 +128,18 @@ public class PanelFiltroCategorias extends JPanel {
     }
 
     // quita el filtro que quiero y reaplico filtrado a los que queden
-    private void quitarFiltro(String filtroABorrar) {
-        filtrosActivos.remove(filtroABorrar);
+    public void quitarFiltro(String filtroABorrar) {
+        filtrosActivos.remove(filtroABorrar); 
         reaplicar();
     }
 
+    // devuelve el valor filtrado ahora para ese criterio, o null si no hay filtro
+    public String getFiltroActivo(String criterioFiltrado) { // para saber cual es el criterio por el cual estamos filtrando
+        return filtrosActivos.get(criterioFiltrado); 
+    }
+
     // guarda el valor elegido para ese criterio de filtrado (tipoFiltrado, por ej "marca") (si ya habia uno, lo sustituye) y reaplica todos los filtros
-   private void aplicarFiltro(String tipoFiltrado, String valor) {
+   public void aplicarFiltro(String tipoFiltrado, String valor) { // lo pongo public para que los botones directos de filtrado puedan llamarlo
         filtrosActivos.put(tipoFiltrado, valor);
         reaplicar();
     }

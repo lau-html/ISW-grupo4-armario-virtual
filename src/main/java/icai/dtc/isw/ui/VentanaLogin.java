@@ -1,12 +1,21 @@
 package icai.dtc.isw.ui;
 
-import icai.dtc.isw.controler.GestorUsuarios;
-import icai.dtc.isw.domain.Usuario;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+
+import icai.dtc.isw.controler.GestorUsuarios;
+import icai.dtc.isw.domain.Usuario;
 
 public class VentanaLogin extends JFrame {
 
@@ -26,17 +35,24 @@ public class VentanaLogin extends JFrame {
         setResizable(false);
 
         // Panel principal
-        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 15));
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 15));
+        panel.setBackground(Tema.CREMA); // fondo crema de la app
         panel.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
 
         JLabel lblEmail = new JLabel("Correo electrónico:");
+        lblEmail.setFont(Tema.getInstancia().fuenteNegrita); // letra en negrita de tema
+        lblEmail.setForeground(Tema.BURDEOS); // texto burdeos
         txtEmail = new JTextField();
+        txtEmail.setFont(Tema.getInstancia().fuenteNormal); // letra normal de Tema
 
         JLabel lblPassword = new JLabel("Contraseña:");
+        lblPassword.setFont(Tema.getInstancia().fuenteNegrita);
+        lblPassword.setForeground(Tema.BURDEOS);
         txtPassword = new JPasswordField();
+        txtPassword.setFont(Tema.getInstancia().fuenteNormal);
 
-        btnLogin = new JButton("Iniciar Sesión");
-        btnIrRegistro = new JButton("Crear Cuenta");
+        btnLogin = Tema.getInstancia().crearBoton("Iniciar Sesión"); // boton burdeos de Tema
+        btnIrRegistro = Tema.getInstancia().crearBoton("Crear Cuenta");
 
         panel.add(lblEmail);
         panel.add(txtEmail);
