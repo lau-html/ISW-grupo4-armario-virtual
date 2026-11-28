@@ -34,6 +34,8 @@ public class Tema {
     public static final Color BURDEOS = new Color(87, 6, 45); // "B" del logo, botones y títulos
     public static final Color LIMA = new Color(225, 236, 159); // detalles
     public static final Color GRIS_TEXTO = new Color(120, 110, 115); // textos secundarios
+    public static final Color GRIS_BOTON = new Color(238, 238, 238); // fondo botones de filtrado
+    public static final Color TEXTO_OSCURO = new Color(40, 40, 40); // texto botones de filtrado
 
     // fuentes de la app (letras normales), son publicas para poder acceder desde fuera
     public final Font fuenteNormal = crearFuente(Font.PLAIN, 14);
@@ -100,6 +102,25 @@ public class Tema {
         boton.setOpaque(true);
         boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         boton.setBorder(BorderFactory.createEmptyBorder(8, 16, 8, 16));
+        return boton;
+    }
+
+    // boton de filtrado: gris claro, o rosa con letra blanca si es el que esta activo
+    public JButton crearBotonFiltrado(String texto, boolean activo) {
+        JButton boton = new JButton(texto);
+        boton.setFont(fuenteNegrita);
+        boton.setFocusPainted(false);
+        boton.setBorderPainted(false);
+        boton.setOpaque(true);
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        boton.setBorder(BorderFactory.createEmptyBorder(6, 14, 6, 14));
+        if (activo) { // el filtro seleccionado es rosa
+            boton.setBackground(ROSA);
+            boton.setForeground(CREMA);
+        } else { // los demas (no seleccionados)
+            boton.setBackground(LIMA);
+            boton.setForeground(BURDEOS);
+        }
         return boton;
     }
 

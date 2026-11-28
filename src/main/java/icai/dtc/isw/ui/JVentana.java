@@ -71,6 +71,7 @@ public class JVentana extends JFrame {
     private List<Prenda> todasLasPrendas = new ArrayList<>(); // todas las prendas usuario
     private final GestorPrendas gestorPrendas = new GestorPrendas(); // lógica de editar y eliminar
     private PanelFiltroCategorias panelFiltro; // filtro de categorias, hay que actualizarlo cuando cambian las prendas para que vea las nuevas categorias
+    private PanelBotonesFiltrado panelBotonesFiltrado; // fila de botones de filtrado por tipo, debajo de la barra de arriba
     private final GestorCategoriasPers gestorCategoriasPers = new GestorCategoriasPers(); // mismo gestor de categorias para el filtro y el detalle
 
     // SPRINT 2 (bonus): desplegable para ordenar por antigüedad - Lau: lo cambio a boton para que cuadre con la estetica
@@ -273,7 +274,12 @@ public class JVentana extends JFrame {
         btnOrden.addActionListener(e -> menuOrden.show(btnOrden, 0, btnOrden.getHeight()));
         barra.add(btnOrden);
 
-        panel.add(barra, BorderLayout.NORTH);
+        panelBotonesFiltrado = new PanelBotonesFiltrado(panelFiltro); // botones de filtrado
+        JPanel zonaSuperior = new JPanel(new BorderLayout()); // panel auxiliar (para poner la barra verde y los botones de siempre)
+        zonaSuperior.setBackground(CREMA);
+        zonaSuperior.add(barra, BorderLayout.NORTH); // arriba, los botones de siempre
+        zonaSuperior.add(panelBotonesFiltrado, BorderLayout.SOUTH); // debajo los botones de filtros
+        panel.add(zonaSuperior, BorderLayout.NORTH); 
 
         // Zona donde se muestran las prendas
         panelPrendas = new JPanel(new BorderLayout());
@@ -657,6 +663,7 @@ public class JVentana extends JFrame {
 
     // Muestra en "Mi armario" la lista de prendas que se le pase.
     public void mostrarPrendas(List<Prenda> prendas) {
+        panelBotonesFiltrado.actualizar(todasLasPrendas); // repinto los botones con los numeros y el filtro activo 
         prendasActuales = new ArrayList<>(prendas); // guardamos la lista para poder editar y eliminar
         prendaSeleccionada = null; // al repintar no esta nada marcado
         tarjetasActuales.clear(); // vacio las tarjetas
