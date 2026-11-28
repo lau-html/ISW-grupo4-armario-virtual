@@ -64,7 +64,9 @@ public class JVentana extends JFrame {
     public static final Color GRIS_TEXTO = Tema.GRIS_TEXTO; // textos secundarios
 
     private JPanel panelPrendas; // zona central de "Mi armario" donde se muestran las prendas
-    private JList<Prenda> listaPrendas; // lista visible (para saber qué prenda está seleccionada)
+    // Nota: antes aqui habia una lista de prendas, que se cambia por tarjetas de prendas y la prenda que se ve como seleccionada
+    private List<TarjetaPrenda> tarjetasActuales = new ArrayList<>(); // las tarjetas de las prendas que se ven 
+    private Prenda prendaSeleccionada = null; // la prenda marcada con un clic (null = ninguna marcada por defecto)
     private List<Prenda> prendasActuales = new ArrayList<>(); // prendas que se están mostrando (pueden ser todas o solo filtradas)
     private List<Prenda> todasLasPrendas = new ArrayList<>(); // todas las prendas usuario
     private final GestorPrendas gestorPrendas = new GestorPrendas(); // lógica de editar y eliminar
@@ -656,7 +658,8 @@ public class JVentana extends JFrame {
     // Muestra en "Mi armario" la lista de prendas que se le pase.
     public void mostrarPrendas(List<Prenda> prendas) {
         prendasActuales = new ArrayList<>(prendas); // guardamos la lista para poder editar y eliminar
-        listaPrendas = null;
+        prendaSeleccionada = null; // al repintar no esta nada marcado
+        tarjetasActuales.clear(); // vacio las tarjetas
         panelPrendas.removeAll();
 
         if (prendas.isEmpty()) {
@@ -671,45 +674,26 @@ public class JVentana extends JFrame {
             lblVacio.setForeground(GRIS_TEXTO);
             panelPrendas.add(lblVacio, BorderLayout.CENTER);
         } else {
-            DefaultListModel<Prenda> modelo = new DefaultListModel<>();
-            for (Prenda prenda : prendas) {
-                modelo.addElement(prenda);
-            }
-            JList<Prenda> lista = new JList<>(modelo);
-            lista.setFont(Tema.getInstancia().fuenteNormal);
-            lista.setFixedCellHeight(36); // filas un poco mas altas
-            lista.setBackground(CREMA); // fondo beige
-            lista.setForeground(BURDEOS); // texto burdeos
-            lista.setSelectionBackground(ROSA);
-            lista.setSelectionForeground(BURDEOS);
-            lista.setCellRenderer(new DefaultListCellRenderer() {
-                @Override
-                public Component getListCellRendererComponent(JList<?> lista, Object valor, int posicion, boolean seleccionada, boolean conFoco) {
-                    JLabel fila = (JLabel) super.getListCellRendererComponent(lista, valor, posicion, seleccionada, conFoco);
-                    fila.setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(235, 225, 218)), // separador fino
-                            BorderFactory.createEmptyBorder(0, 12, 0, 12))); // margen lateral
-                    return fila;
-                }
-            });
 
-            listaPrendas = lista;
-            // Se añade un MouseListener a la lista del catálogo para abrir la ventana emergente al hacer doble clic sobre una prenda.
-            listaPrendas.addMouseListener(new java.awt.event.MouseAdapter() {
-                @Override
-                public void mouseClicked(java.awt.event.MouseEvent e) {
-                    if (e.getClickCount() == 2) {
-                        Prenda prendaSeleccionada = listaPrendas.getSelectedValue();
-                        if (prendaSeleccionada != null) {
-                            new VentanaDetallePrenda(prendaSeleccionada, gestorCategoriasPers, JVentana.this::refrescarVista).setVisible(true); // paso el gestor compartido y el aviso para refrescar
-                        }
-                    }
-                }
-            });
-            JScrollPane scrollLista = new JScrollPane(lista);
-            scrollLista.getViewport().setBackground(CREMA); // fondo de la zona vacia igual que el resto
-            scrollLista.setBorder(BorderFactory.createEmptyBorder()); // quito el marco gris para que quede más estetico
-            panelPrendas.add(scrollLista, BorderLayout.CENTER);
+        JPanel cuadricula = new JPanel(new GridLayout(0, 4, 12, 12)); // 4 columnas por defecto, filas en funcion de prendas
+            cuadricula.setBackground(CREMA);
+            cuadricula.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12)); // borde alrededor 
+            for (Prenda prenda : prendas) { // por cada prenda voy a crear una tarjeta con su foto
+                TarjetaPrenda tarjeta = new TarjetaPrenda(prenda, this); // una tarjeta por prenda del bucle
+                tarjetasActuales.add(tarjeta); // guardo la tarjeta para poder verla, ver info...hacer mas cosas con ella
+                cuadricula.add(tarjeta);
+            }
+            JPanel contenedor = new JPanel(new BorderLayout()); // panel aux, para que las tarjetas no se estiren al ancho y alto de la ventana sino se queden dentro del panel
+            contenedor.setBackground(CREMA);
+            contenedor.add(cuadricula, BorderLayout.NORTH);
+            // pongo la barra de scroll dentro de donde esta la cuadricula de las prendas, le mete la cuadricula (esta en el contenedor)
+            JScrollPane scrollTarjetas = new JScrollPane(contenedor);
+            scrollTarjetas.getViewport().setBackground(CREMA); // le pongo un fondito color crema en la parte q sobra espacio
+            scrollTarjetas.setBorder(BorderFactory.createEmptyBorder());
+            scrollTarjetas.getVerticalScrollBar().setUnitIncrement(16); // scroll suave (solo 16 pixeles, se mueve poco y lento, no de una incomodo)
+
+            panelPrendas.add(scrollTarjetas, BorderLayout.CENTER); //pongo la cuadricula en el centro
+
         }
 
         panelPrendas.revalidate();
@@ -732,15 +716,29 @@ public class JVentana extends JFrame {
         panelFiltro.actualizarPrendas(todasLasPrendas); // actualizar el filtro con la nueva prenda
     }
 
-    // EDITAR Y ELIMINAR PRENDAS
+    // SELECCIONAR, EDITAR Y ELIMINAR PRENDAS
+
+    // Lo llama al hacer clic a una tarjeta, coge la prenda y marca el borde
+    public void seleccionarPrenda(Prenda prenda) {
+        prendaSeleccionada = prenda;
+        for (int i = 0; i < tarjetasActuales.size(); i++) { // busca la prenda que hemos marcado y solo dibujamos el borde de la seleccionada
+            boolean esLaMarcada = (prendasActuales.get(i) == prenda); // si la marcada es por la que va el bucle bool es true
+            tarjetasActuales.get(i).setSeleccionada(esLaMarcada); 
+        }
+    }
+
+    // Lo llama al hacer clic a una tarjeta, coge la prenda y enseña el panel con su informacion en detalle
+    public void abrirDetallePrenda(Prenda prenda) {
+        new VentanaDetallePrenda(prenda, gestorCategoriasPers, JVentana.this::refrescarVista).setVisible(true);
+    }
 
     // Devuelve la prenda seleccionada, o null (con un aviso) si no hay ninguna
     private Prenda obtenerPrendaSeleccionada() {
-        if (listaPrendas == null || listaPrendas.getSelectedValue() == null) {
+        if (prendaSeleccionada == null) { // nadie ha hecho click en ninguna prenda
             JOptionPane.showMessageDialog(this, "Selecciona primero una prenda de tu armario.");
             return null;
         }
-        return listaPrendas.getSelectedValue();
+        return prendaSeleccionada;
     }
 
     // Elimina la prenda seleccionada, pidiendo confirmación antes
