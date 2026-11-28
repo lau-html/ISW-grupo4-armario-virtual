@@ -1,11 +1,15 @@
 package icai.dtc.isw.ui;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
@@ -19,25 +23,30 @@ import javax.swing.SwingConstants;
 
 import icai.dtc.isw.Prenda;
 
+
 // Una tarjeta del armario como panel - se puede ver la foto arriba y nombre y datos debajo
 public class TarjetaPrenda extends JPanel {
 
     // tamaños maximos foto
     private static final int ANCHO_FOTO = 170; 
     private static final int ALTO_FOTO = 200;
+    private static final Color CREMA_CLARO = new Color(255, 251, 248);
+ // fondo de la tarjeta, crema mas claro que el de la ventana para que de un efecto de semiopacidad
+    private static final int REDONDEO = 24; // cuanto voy a redondear las esquinas (cuadricula con bordes redondeados para mayor limpieza)
 
     private final Prenda prenda; // la prenda que dibuja esta tarjeta
     private final JVentana ventana; // para avisarle cuando se hace clic
+    private boolean seleccionada = false; // true = dibuja el borde rosa
 
     public TarjetaPrenda(Prenda prenda, JVentana ventana) {
         this.prenda = prenda;
         this.ventana = ventana;
 
         setLayout(new BorderLayout(0, 6));
-        setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(190, 280)); // tamaño fijo (cuadricula ordenada)
+        setOpaque(false); // sin fondo cuadrado, voy a pintar otro fondo con esquinas redondeadas directamente
+        setBorder(BorderFactory.createEmptyBorder(8, 8, 0, 8)); // margen por dentro
+        setPreferredSize(new Dimension(190, 280)); // tamaño fijo cuadricula
         setCursor(new Cursor(Cursor.HAND_CURSOR)); // manita al pasar por encima
-        setSeleccionada(false); 
 
         add(crearFoto(), BorderLayout.CENTER);
         add(crearTextos(), BorderLayout.SOUTH);
@@ -86,7 +95,7 @@ public class TarjetaPrenda extends JPanel {
     private JPanel crearTextos() {
         JPanel panelTextos = new JPanel();
         panelTextos.setLayout(new BoxLayout(panelTextos, BoxLayout.Y_AXIS));
-        panelTextos.setBackground(Color.WHITE);
+        panelTextos.setOpaque(false); // transparente, antes lo puse blanco pero ahora quiero que se vea el fondo de la tarjeta redondeada crema
         panelTextos.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
 
         JLabel lblNombre = new JLabel(prenda.getNombre());
@@ -102,13 +111,25 @@ public class TarjetaPrenda extends JPanel {
         return panelTextos;
     }
 
+    // Dibujo un fondo para la tarjeta en color crema, esquinas redondeadas
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create(); // copia 
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON); // bordes suaves
+        g2.setColor(CREMA_CLARO);
+        g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, REDONDEO, REDONDEO); // cuadrado esquinas redondeadas
+        if (seleccionada) {
+            g2.setColor(Tema.ROSA); // si la tarjeta esta seleccionada
+            g2.setStroke(new BasicStroke(3)); // ajustes anchura borde 
+            g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, REDONDEO, REDONDEO); // borde rosa alrededor
+        }
+        g2.dispose();
+    }
+
     // Marca la tarjeta con borde en rosita si está seleccionada
     public void setSeleccionada(boolean seleccionada) {
-        if (seleccionada) {
-            setBorder(BorderFactory.createLineBorder(Tema.ROSA, 3));
-        } else {
-            setBorder(BorderFactory.createLineBorder(new Color(235, 225, 218), 1));
-        }
+        this.seleccionada = seleccionada; // me guardo si esta marcada (true o false) para dibujar o quitar el borde
+        repaint(); // vuelvo a dibujar la tarjeta
     }
 
     public Prenda getPrenda() {
